@@ -3,16 +3,12 @@
 import type React from "react"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
+import Link from "next/link"
 import Image from "next/image"
 import { useCart } from "@/context/cart-context"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/hooks/use-toast"
 import { formatPrice } from "@/lib/utils"
-import { X, Tag, Lock, Loader2 } from "lucide-react"
+import { X, Lock, Loader2 } from "lucide-react"
 
 export default function Checkout() {
   const { cart, isLoading: cartLoading, applyCoupon, removeCoupon, getAppliedCoupon } = useCart()
@@ -42,13 +38,13 @@ export default function Checkout() {
     {
       id: "courier",
       name: "Courier",
-      description: "Παράδοση στη διεύθυνσή σας, 1-3 εργάσιμες",
+      description: "Παράδοση στη διεύθυνσή σου, 1–3 εργάσιμες",
       price: 2.0,
     },
     {
       id: "boxnow",
       name: "BoxNow",
-      description: "Παράδοση σε σημείο BoxNow, 1-2 εργάσιμες",
+      description: "Παράδοση σε σημείο BoxNow, 1–2 εργάσιμες",
       price: 2.0,
     },
   ]
@@ -77,9 +73,7 @@ export default function Checkout() {
         body: JSON.stringify({ couponCode: couponInput.trim(), subtotal }),
       })
       const result = await response.json()
-
       if (!response.ok) throw new Error(result.error || "Άκυρο κουπόνι")
-
       if (result.success && result.coupon) {
         applyCoupon(result.coupon)
         setCouponInput("")
@@ -102,7 +96,7 @@ export default function Checkout() {
       !formData.city ||
       !formData.zip
     ) {
-      setFormError("Παρακαλώ συμπλήρωσε όλα τα πεδία με αστερίσκο (*).")
+      setFormError("Συμπλήρωσε όλα τα πεδία με αστερίσκο (*).")
       return false
     }
     setFormError("")
@@ -159,10 +153,12 @@ export default function Checkout() {
 
   if (cartLoading) {
     return (
-      <div className="min-h-screen bg-[#f7e7ce]">
-        <div className="container mx-auto pt-32 pb-12 px-4 text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4" />
-          <p>Φόρτωση καλαθιού...</p>
+      <div className="min-h-screen bg-[#fafaf7] flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="h-6 w-6 mx-auto animate-spin text-[#1a1a1a]/60" />
+          <p className="mt-4 text-[10px] tracking-[0.22em] uppercase text-[#1a1a1a]/50">
+            φόρτωση
+          </p>
         </div>
       </div>
     )
@@ -170,279 +166,334 @@ export default function Checkout() {
 
   if (!cart.items?.length) {
     return (
-      <div className="min-h-screen bg-[#f7e7ce]">
-        <div className="container mx-auto pt-32 pb-12 px-4 text-center">
-          <h1 className="headline-md text-[#1a1a1a] mb-4">το καλάθι σου είναι άδειο</h1>
-          <p className="text-[#502e23]/70 mb-6">
-            Πρόσθεσε προϊόντα στο καλάθι σου για να συνεχίσεις.
+      <div className="min-h-screen bg-[#fafaf7] flex items-center justify-center px-6">
+        <div className="text-center max-w-md">
+          <p className="text-[11px] tracking-[0.22em] uppercase text-[#1a1a1a]/50 mb-4">
+            ολοκλήρωση
           </p>
-          <Button onClick={() => router.push("/")} className="bg-[#1a1a1a] text-white">
-            Περιήγηση στα προϊόντα
-          </Button>
+          <h1 className="headline-md text-[#1a1a1a] mb-6">
+            το καλάθι είναι άδειο
+          </h1>
+          <Link
+            href="/"
+            className="inline-flex items-center justify-center bg-[#1a1a1a] hover:bg-[#1a1a1a]/85 text-white text-sm tracking-[0.06em] uppercase px-8 h-12 transition-colors"
+          >
+            δες τα κεριά
+          </Link>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-[#f7e7ce]">
-      <div className="container mx-auto pt-28 md:pt-32 pb-16 px-4">
-        <div className="mb-8 text-center">
-          <div className="caption text-[#502e23]/60 mb-3">checkout</div>
-          <h1 className="headline-md text-[#1a1a1a]">ολοκλήρωση</h1>
+    <div className="min-h-screen bg-[#fafaf7]">
+      <div className="mx-auto max-w-7xl px-6 md:px-12 lg:px-16 pt-28 md:pt-36 pb-20">
+        {/* Header */}
+        <div className="mb-12 md:mb-16">
+          <p className="text-[11px] tracking-[0.22em] uppercase text-[#1a1a1a]/50 mb-3">
+            ολοκλήρωση
+          </p>
+          <h1 className="headline-md text-[#1a1a1a]">checkout</h1>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
-          <form onSubmit={handleSubmit} className="md:col-span-2 space-y-6">
-            <div className="bg-white/70 p-6 rounded-2xl border border-white/90">
-              <h2 className="text-lg font-semibold mb-4 text-[#1a1a1a]">Στοιχεία πελάτη</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="firstName">Όνομα *</Label>
-                  <Input id="firstName" name="firstName" value={formData.firstName} onChange={handleChange} required />
-                </div>
-                <div>
-                  <Label htmlFor="lastName">Επώνυμο *</Label>
-                  <Input id="lastName" name="lastName" value={formData.lastName} onChange={handleChange} required />
-                </div>
-                <div>
-                  <Label htmlFor="email">Email *</Label>
-                  <Input id="email" name="email" type="email" value={formData.email} onChange={handleChange} required />
-                </div>
-                <div>
-                  <Label htmlFor="phone">Τηλέφωνο *</Label>
-                  <Input id="phone" name="phone" value={formData.phone} onChange={handleChange} required />
+        <div className="grid lg:grid-cols-[1fr_22rem] gap-12 lg:gap-16">
+          <form onSubmit={handleSubmit} className="space-y-14 md:space-y-20">
+            {/* 01 — Στοιχεία πελάτη */}
+            <FormSection number="01" title="στοιχεία επικοινωνίας">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-7">
+                <Field label="όνομα *" name="firstName" value={formData.firstName} onChange={handleChange} required />
+                <Field label="επώνυμο *" name="lastName" value={formData.lastName} onChange={handleChange} required />
+                <Field label="email *" name="email" type="email" value={formData.email} onChange={handleChange} required />
+                <Field label="τηλέφωνο *" name="phone" type="tel" value={formData.phone} onChange={handleChange} required />
+              </div>
+            </FormSection>
+
+            {/* 02 — Διεύθυνση */}
+            <FormSection number="02" title="διεύθυνση αποστολής">
+              <div className="space-y-7">
+                <Field label="διεύθυνση *" name="address1" value={formData.address1} onChange={handleChange} required />
+                <Field label="διεύθυνση 2 (προαιρετικό)" name="address2" value={formData.address2} onChange={handleChange} />
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-7">
+                  <Field label="πόλη *" name="city" value={formData.city} onChange={handleChange} required />
+                  <Field label="περιοχή" name="state" value={formData.state} onChange={handleChange} />
+                  <Field label="τ.κ. *" name="zip" value={formData.zip} onChange={handleChange} required />
                 </div>
               </div>
-            </div>
+            </FormSection>
 
-            <div className="bg-white/70 p-6 rounded-2xl border border-white/90">
-              <h2 className="text-lg font-semibold mb-4 text-[#1a1a1a]">Διεύθυνση αποστολής</h2>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="address1">Διεύθυνση *</Label>
-                  <Input id="address1" name="address1" value={formData.address1} onChange={handleChange} required />
-                </div>
-                <div>
-                  <Label htmlFor="address2">Διεύθυνση 2 (προαιρετικό)</Label>
-                  <Input id="address2" name="address2" value={formData.address2} onChange={handleChange} />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div>
-                    <Label htmlFor="city">Πόλη *</Label>
-                    <Input id="city" name="city" value={formData.city} onChange={handleChange} required />
-                  </div>
-                  <div>
-                    <Label htmlFor="state">Περιοχή</Label>
-                    <Input id="state" name="state" value={formData.state} onChange={handleChange} />
-                  </div>
-                  <div>
-                    <Label htmlFor="zip">Τ.Κ. *</Label>
-                    <Input id="zip" name="zip" value={formData.zip} onChange={handleChange} required />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white/70 p-6 rounded-2xl border border-white/90">
-              <h2 className="text-lg font-semibold mb-4 text-[#1a1a1a]">Τρόπος αποστολής</h2>
+            {/* 03 — Αποστολή */}
+            <FormSection number="03" title="τρόπος αποστολής">
               {isFreeShipping && (
-                <div className="mb-4 p-3 bg-green-50 text-green-800 rounded-md border border-green-200 text-sm font-medium">
-                  ✿ Δωρεάν αποστολή για παραγγελίες άνω των 30€
-                </div>
+                <p className="text-[11px] tracking-[0.18em] uppercase text-[#0f9b81] mb-5 inline-flex items-center gap-2">
+                  <span className="h-1.5 w-1.5 rounded-full bg-[#0f9b81]" />
+                  δωρεάν αποστολή
+                </p>
               )}
-              <RadioGroup
-                value={formData.shippingMethod}
-                onValueChange={(v) => setFormData((p) => ({ ...p, shippingMethod: v }))}
-                className="space-y-3"
-              >
-                {shippingMethods.map((method) => (
-                  <div
-                    key={method.id}
-                    className={`flex items-center justify-between p-4 rounded-md border ${
-                      formData.shippingMethod === method.id
-                        ? "border-[#ff6b35] bg-[#ff6b35]/5"
-                        : "border-[#502e23]/15"
-                    }`}
-                  >
-                    <div className="flex items-center space-x-3">
-                      <RadioGroupItem value={method.id} id={`shipping-${method.id}`} />
-                      <div>
-                        <Label htmlFor={`shipping-${method.id}`} className="font-medium">
-                          {method.name}
-                        </Label>
-                        <p className="text-sm text-[#502e23]/70">{method.description}</p>
+              <div className="space-y-3">
+                {shippingMethods.map((method) => {
+                  const active = formData.shippingMethod === method.id
+                  return (
+                    <label
+                      key={method.id}
+                      className={`flex items-center justify-between gap-4 px-5 py-4 border cursor-pointer transition-colors ${
+                        active
+                          ? "border-[#1a1a1a]"
+                          : "border-[#1a1a1a]/15 hover:border-[#1a1a1a]/40"
+                      }`}
+                    >
+                      <div className="flex items-center gap-4">
+                        <span
+                          className={`h-3.5 w-3.5 rounded-full border transition-colors ${
+                            active
+                              ? "border-[#1a1a1a] bg-[#1a1a1a] ring-2 ring-white ring-inset"
+                              : "border-[#1a1a1a]/30"
+                          }`}
+                        />
+                        <input
+                          type="radio"
+                          name="shippingMethod"
+                          value={method.id}
+                          checked={active}
+                          onChange={(e) =>
+                            setFormData((p) => ({ ...p, shippingMethod: e.target.value }))
+                          }
+                          className="sr-only"
+                        />
+                        <div>
+                          <p className="text-[#1a1a1a] text-base">{method.name}</p>
+                          <p className="text-xs text-[#1a1a1a]/55 mt-0.5">{method.description}</p>
+                        </div>
                       </div>
-                    </div>
-                    <div>
-                      {isFreeShipping ? (
-                        <span className="text-green-700 font-medium">Δωρεάν</span>
-                      ) : (
-                        <span>{formatPrice(method.price)}</span>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </RadioGroup>
-            </div>
+                      <span className="text-sm tabular-nums text-[#1a1a1a]">
+                        {isFreeShipping ? "δωρεάν" : formatPrice(method.price)}
+                      </span>
+                    </label>
+                  )
+                })}
+              </div>
+            </FormSection>
 
-            <div className="bg-white/70 p-6 rounded-2xl border border-white/90">
-              <h2 className="text-lg font-semibold mb-4 text-[#1a1a1a]">Τρόπος πληρωμής</h2>
-              <div className="flex items-center gap-4 p-4 border border-[#502e23]/15 rounded-md bg-white/60">
-                <Lock className="h-5 w-5 text-[#ff6b35]" />
+            {/* 04 — Πληρωμή */}
+            <FormSection number="04" title="πληρωμή">
+              <div className="flex items-center gap-4 px-5 py-4 border border-[#1a1a1a]/15">
+                <Lock className="h-4 w-4 text-[#1a1a1a]/70 shrink-0" />
                 <div>
-                  <p className="font-medium text-[#1a1a1a]">Stripe Secure Checkout</p>
-                  <p className="text-sm text-[#502e23]/70">
-                    Ασφαλής πληρωμή με κάρτα, Apple Pay ή Google Pay
+                  <p className="text-[#1a1a1a] text-sm">Stripe Secure Checkout</p>
+                  <p className="text-xs text-[#1a1a1a]/55 mt-0.5">
+                    Πληρωμή με κάρτα, Apple Pay ή Google Pay
                   </p>
                 </div>
               </div>
-            </div>
+            </FormSection>
 
             {formError && (
-              <div className="p-4 bg-red-50 border border-red-200 rounded-md text-red-700">
-                {formError}
-              </div>
+              <p className="text-sm text-destructive">{formError}</p>
             )}
 
-            <Button
+            <button
               type="submit"
-              className="w-full py-6 text-base bg-[#1a1a1a] hover:bg-[#1a1a1a]/85 text-white tracking-wide"
               disabled={isSubmitting}
+              className="w-full h-14 inline-flex items-center justify-center gap-3 bg-[#1a1a1a] hover:bg-[#1a1a1a]/85 disabled:opacity-60 text-white text-sm tracking-[0.08em] uppercase transition-colors"
             >
               {isSubmitting ? (
                 <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Μεταφορά στο Stripe...
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  μεταφορά στο stripe…
                 </>
               ) : (
-                <>Συνέχεια στην πληρωμή · {formatPrice(total)}</>
+                <>
+                  <span>συνέχεια στην πληρωμή</span>
+                  <span className="text-white/40">·</span>
+                  <span className="tabular-nums">{formatPrice(total)}</span>
+                </>
               )}
-            </Button>
+            </button>
           </form>
 
-          <div className="md:sticky md:top-24 h-fit">
-            <div className="bg-white/70 p-6 rounded-2xl border border-white/90">
-              <h2 className="text-lg font-semibold mb-4 text-[#1a1a1a]">Σύνοψη</h2>
+          {/* Summary */}
+          <aside className="lg:sticky lg:top-32 lg:self-start">
+            <p className="text-[11px] tracking-[0.22em] uppercase text-[#1a1a1a]/50 mb-6">
+              σύνοψη
+            </p>
 
-              <div className="space-y-4 mb-6">
-                {cart.items.map((item) => (
-                  <div key={item.id} className="flex items-center gap-3">
-                    <div className="relative w-14 h-14 bg-white rounded-md overflow-hidden flex-shrink-0">
-                      {item.product?.images?.[0]?.url ? (
-                        <Image
-                          src={item.product.images[0].url}
-                          alt={item.product.name || ""}
-                          fill
-                          className="object-contain p-1.5"
-                          sizes="56px"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center text-[#502e23]/40 text-xs">
-                          –
-                        </div>
-                      )}
-                      {item.quantity > 1 && (
-                        <div className="absolute -top-1 -right-1 bg-[#ff6b35] text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold">
-                          {item.quantity}
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm text-[#1a1a1a] line-clamp-1">
-                        {item.product?.name}
-                      </p>
-                      <p className="text-xs text-[#502e23]/65">{formatPrice(item.price)}</p>
-                    </div>
-                    <span className="text-sm font-semibold">{formatPrice(item.price_total)}</span>
-                  </div>
-                ))}
-              </div>
-
-              <Separator className="my-4" />
-
-              <div className="mb-4">
-                <h3 className="text-sm font-medium mb-3 text-[#1a1a1a]">Κουπόνι</h3>
-                {appliedCoupon ? (
-                  <div className="p-3 bg-green-50 border border-green-200 rounded-md">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <Tag className="h-4 w-4 text-green-700" />
-                        <span className="text-sm font-medium text-green-800">
-                          {appliedCoupon.name || appliedCoupon.code}
-                        </span>
-                      </div>
-                      <span className="text-sm font-medium text-green-700">
-                        -{formatPrice(discountTotal)}
-                      </span>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={removeCoupon}
-                      className="w-full text-red-600 border-red-200 hover:bg-red-50 bg-transparent"
-                    >
-                      <X className="h-4 w-4 mr-2" />
-                      Αφαίρεση
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-2">
-                    <div className="flex gap-2">
-                      <Input
-                        type="text"
-                        placeholder="Κωδικός κουπονιού"
-                        value={couponInput}
-                        onChange={(e) => setCouponInput(e.target.value)}
-                        className="flex-1"
+            <div className="border-t border-[#1a1a1a]/12 divide-y divide-[#1a1a1a]/8">
+              {cart.items.map((item) => (
+                <div key={item.id} className="flex items-center gap-3 py-4">
+                  <div className="relative w-12 h-12 bg-[#f4eee2] overflow-hidden flex-shrink-0">
+                    {item.product?.images?.[0]?.url ? (
+                      <Image
+                        src={item.product.images[0].url}
+                        alt={item.product.name || ""}
+                        fill
+                        className="object-contain p-1.5"
+                        sizes="48px"
                       />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={handleApplyCoupon}
-                        disabled={!couponInput.trim() || isApplyingCoupon}
-                        className="whitespace-nowrap bg-transparent"
-                      >
-                        {isApplyingCoupon ? "Εφαρμογή..." : "Εφαρμογή"}
-                      </Button>
-                    </div>
-                    {couponError && <p className="text-sm text-red-600">{couponError}</p>}
+                    ) : null}
+                    {item.quantity > 1 && (
+                      <span className="absolute -top-1 -right-1 bg-[#1a1a1a] text-white text-[10px] tabular-nums w-4 h-4 flex items-center justify-center">
+                        {item.quantity}
+                      </span>
+                    )}
                   </div>
-                )}
-              </div>
-
-              <Separator className="my-4" />
-
-              <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
-                  <span className="text-[#502e23]">Υποσύνολο</span>
-                  <span>{formatPrice(subtotal)}</span>
-                </div>
-                {discountTotal > 0 && (
-                  <div className="flex justify-between text-green-700">
-                    <span>Έκπτωση</span>
-                    <span>-{formatPrice(discountTotal)}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-[#1a1a1a] line-clamp-1">{item.product?.name}</p>
+                    <p className="text-[10px] tracking-[0.12em] uppercase text-[#1a1a1a]/50 mt-0.5 tabular-nums">
+                      {formatPrice(item.price)} · {item.quantity}
+                    </p>
                   </div>
-                )}
-                <div className="flex justify-between">
-                  <span className="text-[#502e23]">Μεταφορικά</span>
-                  {isFreeShipping ? (
-                    <span className="text-green-700">Δωρεάν</span>
-                  ) : (
-                    <span>{formatPrice(shippingCost)}</span>
-                  )}
+                  <span className="text-sm text-[#1a1a1a] tabular-nums">
+                    {formatPrice(item.price_total)}
+                  </span>
                 </div>
-                <Separator className="my-2" />
-                <div className="flex justify-between font-bold text-lg pt-1">
-                  <span>Σύνολο</span>
-                  <span>{formatPrice(total)}</span>
-                </div>
-              </div>
+              ))}
             </div>
-          </div>
+
+            {/* Coupon */}
+            <div className="mt-8">
+              <p className="text-[11px] tracking-[0.22em] uppercase text-[#1a1a1a]/50 mb-3">
+                κουπόνι
+              </p>
+              {appliedCoupon ? (
+                <div className="flex items-center justify-between border border-[#1a1a1a]/15 px-4 py-3">
+                  <div className="min-w-0">
+                    <p className="text-sm text-[#1a1a1a]">{appliedCoupon.name || appliedCoupon.code}</p>
+                    <p className="text-xs text-[#0f9b81] mt-0.5 tabular-nums">
+                      −{formatPrice(discountTotal)}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={removeCoupon}
+                    className="text-[#1a1a1a]/40 hover:text-[#1a1a1a] transition-colors"
+                    aria-label="Αφαίρεση κουπονιού"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="κωδικός"
+                    value={couponInput}
+                    onChange={(e) => setCouponInput(e.target.value)}
+                    className="flex-1 px-0 py-2 bg-transparent border-0 border-b border-[#1a1a1a]/20 focus:border-[#1a1a1a] focus:outline-none text-[#1a1a1a] placeholder-[#1a1a1a]/30 text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleApplyCoupon}
+                    disabled={!couponInput.trim() || isApplyingCoupon}
+                    className="text-xs tracking-[0.12em] uppercase text-[#1a1a1a] border-b border-[#1a1a1a] hover:opacity-70 disabled:opacity-30 pb-1.5 transition-opacity whitespace-nowrap"
+                  >
+                    {isApplyingCoupon ? "…" : "εφαρμογή"}
+                  </button>
+                </div>
+              )}
+              {couponError && (
+                <p className="text-xs text-destructive mt-2">{couponError}</p>
+              )}
+            </div>
+
+            {/* Totals */}
+            <div className="mt-8 space-y-3 text-sm border-t border-[#1a1a1a]/12 pt-5">
+              <Row label="υποσύνολο" value={formatPrice(subtotal)} />
+              {discountTotal > 0 && (
+                <Row label="έκπτωση" value={`−${formatPrice(discountTotal)}`} emphasis />
+              )}
+              <Row
+                label="μεταφορικά"
+                value={isFreeShipping ? "δωρεάν" : formatPrice(shippingCost)}
+                emphasis={isFreeShipping}
+              />
+            </div>
+
+            <div className="mt-8 pt-6 border-t border-[#1a1a1a] flex items-baseline justify-between gap-4">
+              <span className="text-[11px] tracking-[0.22em] uppercase text-[#1a1a1a]/50">
+                σύνολο
+              </span>
+              <span className="font-light text-[#1a1a1a] text-4xl md:text-5xl tabular-nums tracking-tight leading-none">
+                {formatPrice(total)}
+              </span>
+            </div>
+          </aside>
         </div>
       </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+function FormSection({
+  number,
+  title,
+  children,
+}: {
+  number: string
+  title: string
+  children: React.ReactNode
+}) {
+  return (
+    <section>
+      <div className="flex items-baseline gap-6 md:gap-10 mb-8 pb-4 border-b border-[#1a1a1a]">
+        <span className="text-sm tabular-nums tracking-[0.1em] text-[#1a1a1a]/40">
+          {number}
+        </span>
+        <h2 className="text-xl md:text-2xl tracking-tight lowercase text-[#1a1a1a]">
+          {title}
+        </h2>
+      </div>
+      <div className="md:pl-[3.25rem]">{children}</div>
+    </section>
+  )
+}
+
+function Field({
+  label,
+  name,
+  value,
+  onChange,
+  type = "text",
+  required = false,
+}: {
+  label: string
+  name: string
+  value: string
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+  type?: string
+  required?: boolean
+}) {
+  return (
+    <label className="block">
+      <span className="text-[11px] tracking-[0.2em] uppercase text-[#1a1a1a]/50 block mb-2">
+        {label}
+      </span>
+      <input
+        type={type}
+        name={name}
+        value={value}
+        onChange={onChange}
+        required={required}
+        className="w-full px-0 py-2 bg-transparent border-0 border-b border-[#1a1a1a]/20 focus:border-[#1a1a1a] focus:outline-none text-[#1a1a1a] placeholder-[#1a1a1a]/30 text-base transition-colors"
+      />
+    </label>
+  )
+}
+
+function Row({
+  label,
+  value,
+  emphasis,
+}: {
+  label: string
+  value: string
+  emphasis?: boolean
+}) {
+  return (
+    <div className="flex items-baseline justify-between gap-4">
+      <span className="text-[#1a1a1a]/65">{label}</span>
+      <span className={`tabular-nums ${emphasis ? "text-[#0f9b81]" : "text-[#1a1a1a]"}`}>
+        {value}
+      </span>
     </div>
   )
 }
