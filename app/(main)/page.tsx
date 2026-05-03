@@ -16,17 +16,17 @@ export default async function Home() {
   let carFragranceProducts: Product[] = []
   let waxMeltProducts: Product[] = []
   let featuredDrops: Array<{ drop: Drop; products: Product[] }> = []
-  let aboutHomeHtml: string | null = null
-  let aboutHomeTitle: string | null = null
+  let aboutHtml: string | null = null
+  let aboutTitle: string | null = null
 
   try {
-    const [candleData, fragranceData, carFragranceData, waxMeltData, featured, aboutHome] = await Promise.all([
+    const [candleData, fragranceData, carFragranceData, waxMeltData, featured, aboutPage] = await Promise.all([
       getProducts({ limit: 50, category: "candles" }).catch(() => ({ results: [], count: 0 })),
       getProducts({ limit: 50, category: "aromatics" }).catch(() => ({ results: [], count: 0 })),
       getProducts({ limit: 50, category: "car-diffuser" }).catch(() => ({ results: [], count: 0 })),
       getProducts({ limit: 50, category: "wax-melts" }).catch(() => ({ results: [], count: 0 })),
       getFeaturedDrops().catch(() => []),
-      getPage("about-home").catch(() => null),
+      getPage("about-us").catch(() => null),
     ])
 
     candleProducts = candleData?.results || []
@@ -34,8 +34,8 @@ export default async function Home() {
     carFragranceProducts = carFragranceData?.results || []
     waxMeltProducts = waxMeltData?.results || []
     featuredDrops = featured
-    aboutHomeHtml = aboutHome?.content || null
-    aboutHomeTitle = aboutHome?.name || null
+    aboutHtml = aboutPage?.content || null
+    aboutTitle = aboutPage?.name || null
   } catch (error) {
     console.error("Error in home page:", error)
   }
@@ -64,7 +64,7 @@ export default async function Home() {
         waxMeltProducts={waxMeltProducts}
       />
       <FeaturesSection />
-      <AboutSection title={aboutHomeTitle} contentHtml={aboutHomeHtml} />
+      <AboutSection title={aboutTitle} contentHtml={aboutHtml} />
       <NewsletterSection />
     </div>
   )

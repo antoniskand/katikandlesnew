@@ -4,7 +4,7 @@ import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
 
-const FALLBACK_TITLE = "ξεκίνησε από μια εξεταστική"
+const FALLBACK_TITLE = "kati diko mas"
 const FALLBACK_HTML = `
 <p>Το Kati Kandles γεννήθηκε μέσα από μια ανάγκη και όχι από μια επιχειρηματική στρατηγική. Ο δημιουργός του αναζητούσε έναν τρόπο να κάνει ένα δημιουργικό διάλειμμα — να μάθει κάτι καινούριο και να δημιουργήσει με τα χέρια του.</p>
 <p>Σήμερα, κάθε κερί αφηγείται μια ιστορία.</p>
@@ -15,8 +15,7 @@ interface Props {
   contentHtml?: string | null
 }
 
-// Render the editor's title with manual line breaks. The convention is that
-// a literal "\n" or " · " in the page name acts as the wrap point on desktop.
+// Render the editor's title with manual line breaks. " · " or "\n" wraps.
 function renderTitle(raw: string) {
   const parts = raw.split(/\\n|\n|\s·\s/g).map((p) => p.trim()).filter(Boolean)
   if (parts.length <= 1) return raw
@@ -31,9 +30,18 @@ function renderTitle(raw: string) {
   )
 }
 
+// Pull the first two <p> blocks from the full /about HTML so the home
+// teaser stays in sync with whatever editors save in /admin/pages.
+function teaserHtml(html: string): string {
+  const re = /<p[^>]*>[\s\S]*?<\/p>/gi
+  const matches = html.match(re) || []
+  if (matches.length === 0) return html
+  return matches.slice(0, 2).join("\n")
+}
+
 export function AboutSection({ title, contentHtml }: Props) {
   const heading = title || FALLBACK_TITLE
-  const html = contentHtml || FALLBACK_HTML
+  const html = teaserHtml(contentHtml || FALLBACK_HTML)
 
   return (
     <section className="relative py-24 md:py-36 bg-[#fafaf7] overflow-hidden">
