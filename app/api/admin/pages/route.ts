@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { revalidatePath } from "next/cache"
 import { asc } from "drizzle-orm"
 import { db } from "@/lib/db"
 import { pages } from "@/lib/db/schema"
@@ -32,5 +33,8 @@ export async function POST(request: NextRequest) {
       active: body.active !== false,
     })
     .returning()
+
+  revalidatePath("/")
+  revalidatePath(`/${page.slug}`)
   return NextResponse.json({ success: true, page })
 }

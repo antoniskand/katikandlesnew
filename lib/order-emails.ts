@@ -3,10 +3,29 @@
 // Triggered after Stripe webhook flips an order to status='paid'.
 
 import { Resend } from "resend"
+import { db } from "@/lib/db"
+import { adminUsers } from "@/lib/db/schema"
 import type { Order, OrderItem } from "@/types/product"
 
 const FROM = process.env.AUTH_RESEND_FROM || "Kati Kandles <orders@katikandles.gr>"
-const ADMIN_NOTIFY_EMAIL = process.env.ORDER_ADMIN_EMAIL || ""
+
+// Email(s) that get the "new order" notification.
+//   - process.env.ORDER_ADMIN_EMAIL — comma-separated explicit override
+//   - otherwise: every row in admin_users (owner + admin roles)
+async function adminNotifyAddresses(): Promise<string[]> {
+  const fromEnv = (process.env.ORDER_ADMIN_EMAIL || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean)
+  if (fromEnv.length > 0) return fromEnv
+  try {
+    const rows = await db.select({ email: adminUsers.email }).from(adminUsers)
+    return rows.map((r) => r.email).filter(Boolean)
+  } catch (e) {
+    console.error("[order-email] failed to load admin allowlist:", e)
+    return []
+  }
+}
 
 function priceFmt(n: number) {
   return `€${Number(n).toFixed(2).replace(".", ",")}`
@@ -179,12 +198,13 @@ export async function sendOrderConfirmation(
     console.error("[order-email] customer send failed:", e)
   }
 
-  // Admin notification
-  if (ADMIN_NOTIFY_EMAIL) {
+  // Admin notification — every admin in the allowlist gets the heads-up
+  const adminEmails = await adminNotifyAddresses()
+  if (adminEmails.length > 0) {
     try {
       await client.emails.send({
         from: FROM,
-        to: ADMIN_NOTIFY_EMAIL,
+        to: adminEmails,
         subject: `Νέα παραγγελία · ${order.order_number}`,
         html: adminHtml(order, items),
       })

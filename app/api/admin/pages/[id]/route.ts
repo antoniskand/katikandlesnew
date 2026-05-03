@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { revalidatePath } from "next/cache"
 import { eq } from "drizzle-orm"
 import { db } from "@/lib/db"
 import { pages } from "@/lib/db/schema"
@@ -8,6 +9,23 @@ export const dynamic = "force-dynamic"
 
 interface Ctx {
   params: Promise<{ id: string }>
+}
+
+// Public surfaces a page row can affect. Pinging them clears the ISR cache
+// so editor changes show up immediately instead of waiting on revalidate.
+function revalidateForSlug(slug: string | undefined | null) {
+  revalidatePath("/")
+  if (!slug) return
+  if (slug === "about-us" || slug === "about-home") {
+    revalidatePath("/about")
+  } else if (slug === "terms-privacy") {
+    revalidatePath("/terms-privacy")
+  } else if (slug === "shipping-returns") {
+    revalidatePath("/shipping-returns")
+  } else if (slug === "privacy-policy") {
+    revalidatePath("/privacy-policy")
+  }
+  revalidatePath(`/${slug}`)
 }
 
 export async function PUT(request: NextRequest, { params }: Ctx) {
@@ -22,11 +40,13 @@ export async function PUT(request: NextRequest, { params }: Ctx) {
   if (body.active !== undefined) update.active = body.active
 
   const [page] = await db.update(pages).set(update).where(eq(pages.id, id)).returning()
+  revalidateForSlug(page?.slug)
   return NextResponse.json({ success: true, page })
 }
 
 export async function DELETE(_req: NextRequest, { params }: Ctx) {
   const { id } = await params
-  await db.delete(pages).where(eq(pages.id, id))
+  const [page] = await db.delete(pages).where(eq(pages.id, id)).returning()
+  revalidateForSlug(page?.slug)
   return NextResponse.json({ success: true })
 }

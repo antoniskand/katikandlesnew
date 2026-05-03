@@ -17,6 +17,7 @@ export default async function Home() {
   let waxMeltProducts: Product[] = []
   let featuredDrops: Array<{ drop: Drop; products: Product[] }> = []
   let aboutHomeHtml: string | null = null
+  let aboutHomeTitle: string | null = null
 
   try {
     const [candleData, fragranceData, carFragranceData, waxMeltData, featured, aboutHome] = await Promise.all([
@@ -34,6 +35,7 @@ export default async function Home() {
     waxMeltProducts = waxMeltData?.results || []
     featuredDrops = featured
     aboutHomeHtml = aboutHome?.content || null
+    aboutHomeTitle = aboutHome?.name || null
   } catch (error) {
     console.error("Error in home page:", error)
   }
@@ -62,7 +64,7 @@ export default async function Home() {
         waxMeltProducts={waxMeltProducts}
       />
       <FeaturesSection />
-      <AboutSection contentHtml={aboutHomeHtml} />
+      <AboutSection title={aboutHomeTitle} contentHtml={aboutHomeHtml} />
       <NewsletterSection />
     </div>
   )

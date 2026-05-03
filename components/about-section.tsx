@@ -4,12 +4,35 @@ import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
 
+const FALLBACK_TITLE = "ξεκίνησε από μια εξεταστική"
 const FALLBACK_HTML = `
 <p>Το Kati Kandles γεννήθηκε μέσα από μια ανάγκη και όχι από μια επιχειρηματική στρατηγική. Ο δημιουργός του αναζητούσε έναν τρόπο να κάνει ένα δημιουργικό διάλειμμα — να μάθει κάτι καινούριο και να δημιουργήσει με τα χέρια του.</p>
 <p>Σήμερα, κάθε κερί αφηγείται μια ιστορία.</p>
 `
 
-export function AboutSection({ contentHtml }: { contentHtml?: string | null }) {
+interface Props {
+  title?: string | null
+  contentHtml?: string | null
+}
+
+// Render the editor's title with manual line breaks. The convention is that
+// a literal "\n" or " · " in the page name acts as the wrap point on desktop.
+function renderTitle(raw: string) {
+  const parts = raw.split(/\\n|\n|\s·\s/g).map((p) => p.trim()).filter(Boolean)
+  if (parts.length <= 1) return raw
+  return (
+    <>
+      {parts.map((p, i) => (
+        <span key={i} className="block">
+          {p}
+        </span>
+      ))}
+    </>
+  )
+}
+
+export function AboutSection({ title, contentHtml }: Props) {
+  const heading = title || FALLBACK_TITLE
   const html = contentHtml || FALLBACK_HTML
 
   return (
@@ -39,10 +62,8 @@ export function AboutSection({ contentHtml }: { contentHtml?: string | null }) {
             <p className="text-[11px] tracking-[0.22em] uppercase text-[#1a1a1a]/50 mb-4">
               our story
             </p>
-            <h3 className="headline-md text-[#1a1a1a] mb-10">
-              ξεκίνησε από
-              <br />
-              μια εξεταστική
+            <h3 className="headline-md text-[#1a1a1a] mb-10 lowercase">
+              {renderTitle(heading)}
             </h3>
 
             <motion.div
