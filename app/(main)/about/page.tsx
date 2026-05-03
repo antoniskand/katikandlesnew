@@ -18,18 +18,20 @@ export default async function AboutPage() {
   if (!pageContent) notFound()
 
   return (
-    <section className="pt-28 md:pt-32 pb-16 bg-[#f7e7ce]">
+    <section className="pt-28 md:pt-36 pb-20 bg-[#fafaf7]">
       <BreadcrumbJsonLd
         items={[
           { name: "Αρχική", url: "/" },
           { name: "Η ιστορία μας", url: "/about" },
         ]}
       />
-      <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-        <div className="caption text-[#502e23]/60 mb-3">our story</div>
-        <h1 className="headline-md text-[#1a1a1a] mb-8">{pageContent.name}</h1>
+      <div className="mx-auto max-w-3xl px-6 md:px-12 lg:px-16">
+        <p className="text-[11px] tracking-[0.22em] uppercase text-[#1a1a1a]/50 mb-4">
+          our story
+        </p>
+        <h1 className="headline-md text-[#1a1a1a] mb-12">{pageContent.name}</h1>
         <div
-          className="prose prose-lg max-w-none text-[#502e23]/85 prose-headings:text-[#1a1a1a] prose-strong:text-[#1a1a1a] prose-a:text-[#ff6b35]"
+          className="prose prose-lg max-w-none text-[#1a1a1a]/80 prose-headings:text-[#1a1a1a] prose-strong:text-[#1a1a1a] prose-a:text-[#1a1a1a] prose-a:underline prose-a:underline-offset-4"
           dangerouslySetInnerHTML={{ __html: pageContent.content || "" }}
         />
       </div>

@@ -3,7 +3,6 @@
 import { useState } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import Image from "next/image"
-import { ChevronDown } from "lucide-react"
 
 export function AboutSection() {
   const [isExpanded, setIsExpanded] = useState(false)
@@ -19,83 +18,85 @@ export function AboutSection() {
   ]
 
   return (
-    <section className="relative py-24 bg-[#f7e7ce] overflow-hidden">
+    <section className="relative py-24 md:py-36 bg-[#fafaf7] overflow-hidden">
       {/* Massive background type */}
       <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 z-0 pointer-events-none overflow-hidden">
         <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
+          initial={{ opacity: 0, x: -60 }}
+          whileInView={{ opacity: 1, x: 0 }}
           transition={{ duration: 1.2 }}
           viewport={{ once: true }}
+          className="-ml-[3vw]"
         >
-          <h2 className="display-huge text-[#502e23] opacity-[0.06] whitespace-nowrap">
+          <span
+            className="block whitespace-nowrap font-light tracking-tighter leading-none lowercase text-[#1a1a1a]"
+            style={{ fontSize: "clamp(8rem, 22vw, 22rem)", opacity: 0.05 }}
+          >
             crafting moods
-          </h2>
+          </span>
         </motion.div>
       </div>
 
-      <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+      <div className="relative z-10 mx-auto max-w-7xl px-6 md:px-12 lg:px-16">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
           <div className="order-2 lg:order-1">
-            <div className="caption text-[#ff6b35] mb-3">our story</div>
-            <h3 className="headline-md text-[#502e23] mb-8">
+            <p className="text-[11px] tracking-[0.22em] uppercase text-[#1a1a1a]/50 mb-4">
+              our story
+            </p>
+            <h3 className="headline-md text-[#1a1a1a] mb-10">
               crafting moods,
               <br />
               not just candles
             </h3>
 
-            {visibleParagraphs.map((paragraph, index) => (
-              <motion.p
-                key={index}
-                className="body-md text-[#502e23]/80 mb-4"
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.08 }}
-                viewport={{ once: true }}
-              >
-                {paragraph}
-              </motion.p>
-            ))}
-
-            <AnimatePresence>
-              {isExpanded && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.4 }}
+            <div className="space-y-5 text-[#1a1a1a]/75 leading-relaxed">
+              {visibleParagraphs.map((paragraph, index) => (
+                <motion.p
+                  key={index}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.08 }}
+                  viewport={{ once: true }}
                 >
-                  {hiddenParagraphs.map((paragraph, index) => (
-                    <motion.p
-                      key={index}
-                      className="body-md text-[#502e23]/80 mb-4"
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3, delay: index * 0.08 }}
-                    >
-                      {paragraph}
-                    </motion.p>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
+                  {paragraph}
+                </motion.p>
+              ))}
+
+              <AnimatePresence>
+                {isExpanded && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.4 }}
+                    className="space-y-5"
+                  >
+                    {hiddenParagraphs.map((paragraph, index) => (
+                      <motion.p
+                        key={index}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3, delay: index * 0.08 }}
+                      >
+                        {paragraph}
+                      </motion.p>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
 
             <button
               onClick={() => setIsExpanded(!isExpanded)}
-              className="inline-flex items-center gap-2 text-[#502e23] font-medium hover:opacity-70 transition-opacity mt-2 caption uppercase tracking-wider"
+              className="mt-8 inline-block text-xs tracking-[0.18em] uppercase text-[#1a1a1a] border-b border-[#1a1a1a] hover:opacity-70 pb-1 transition-opacity"
             >
-              <span>{isExpanded ? "λιγότερα" : "περισσότερα"}</span>
-              <ChevronDown
-                className={`w-4 h-4 transition-transform duration-300 ${
-                  isExpanded ? "rotate-180" : ""
-                }`}
-              />
+              {isExpanded ? "λιγότερα ←" : "περισσότερα →"}
             </button>
           </div>
 
           <div className="order-1 lg:order-2 relative">
             <motion.div
-              className="rounded-2xl overflow-hidden aspect-square bg-white/40 flex items-center justify-center"
+              className="aspect-square bg-[#f4eee2] flex items-center justify-center"
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8 }}

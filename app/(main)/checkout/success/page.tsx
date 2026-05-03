@@ -1,10 +1,10 @@
 "use client"
 
 import { useEffect, useState, Suspense } from "react"
-import { useSearchParams, useRouter } from "next/navigation"
+import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import { useCart } from "@/context/cart-context"
-import { Button } from "@/components/ui/button"
-import { CheckCircle, Loader2 } from "lucide-react"
+import { Loader2 } from "lucide-react"
 import { formatPrice } from "@/lib/utils"
 
 interface Order {
@@ -17,7 +17,6 @@ interface Order {
 function SuccessPageContent() {
   const searchParams = useSearchParams()
   const sessionId = searchParams.get("session_id")
-  const router = useRouter()
   const { clearCart } = useCart()
   const [order, setOrder] = useState<Order | null>(null)
   const [loading, setLoading] = useState(true)
@@ -25,7 +24,7 @@ function SuccessPageContent() {
 
   useEffect(() => {
     if (!sessionId) {
-      setError("Could not verify payment. Missing session data.")
+      setError("Δεν μπόρεσε να επιβεβαιωθεί η πληρωμή. Λείπουν δεδομένα του session.")
       setLoading(false)
       return
     }
@@ -63,49 +62,84 @@ function SuccessPageContent() {
   }, [sessionId, clearCart])
 
   return (
-    <div className="container mx-auto pt-32 pb-16 px-4 text-center">
+    <div className="min-h-screen bg-[#fafaf7] flex items-center justify-center px-6 py-32">
       {loading && (
-        <div>
-          <Loader2 className="h-12 w-12 text-[#ff6b35] mx-auto animate-spin mb-4" />
-          <h1 className="headline-sm text-[#1a1a1a] mb-2">Επιβεβαίωση πληρωμής...</h1>
-          <p className="text-[#502e23]/70">Επεξεργαζόμαστε την παραγγελία σου. Μην κλείσεις τη σελίδα.</p>
+        <div className="text-center max-w-md">
+          <Loader2 className="h-6 w-6 mx-auto animate-spin text-[#1a1a1a]/60 mb-6" />
+          <p className="text-[11px] tracking-[0.22em] uppercase text-[#1a1a1a]/50 mb-3">
+            επιβεβαίωση πληρωμής
+          </p>
+          <h1 className="headline-md text-[#1a1a1a] mb-4">επεξεργαζόμαστε</h1>
+          <p className="text-[#1a1a1a]/65 text-sm leading-relaxed">
+            Μην κλείσεις τη σελίδα. Θα ολοκληρωθεί σε λίγα δευτερόλεπτα.
+          </p>
         </div>
       )}
 
       {error && (
-        <div className="bg-destructive/10 border border-destructive/20 text-destructive p-6 rounded-lg max-w-md mx-auto">
-          <h1 className="text-2xl font-semibold mb-2">Σφάλμα</h1>
-          <p>{error}</p>
-          <Button onClick={() => router.push("/")} className="mt-6">
-            Επιστροφή στην αρχική
-          </Button>
+        <div className="text-center max-w-md">
+          <p className="text-[11px] tracking-[0.22em] uppercase text-destructive mb-3">σφάλμα</p>
+          <h1 className="headline-md text-[#1a1a1a] mb-4">κάτι πήγε στραβά</h1>
+          <p className="text-[#1a1a1a]/65 text-sm leading-relaxed mb-8">{error}</p>
+          <Link
+            href="/"
+            className="inline-flex items-center justify-center bg-[#1a1a1a] hover:bg-[#1a1a1a]/85 text-white text-sm tracking-[0.06em] uppercase px-8 h-12 transition-colors"
+          >
+            επιστροφή στην αρχική
+          </Link>
         </div>
       )}
 
       {order && (
-        <div className="max-w-2xl mx-auto">
-          <CheckCircle className="h-16 w-16 text-green-600 mx-auto mb-4" />
-          <h1 className="headline-md text-[#1a1a1a] mb-2">η παραγγελία σου ολοκληρώθηκε!</h1>
-          <p className="text-[#502e23]/70 mb-6">
-            Λάβαμε την πληρωμή σου. Ένα email επιβεβαίωσης έχει σταλεί στη διεύθυνση {order.customer_email || "σου"}.
+        <div className="max-w-xl w-full">
+          <p className="text-[11px] tracking-[0.22em] uppercase text-[#0f9b81] mb-4 inline-flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#0f9b81]" />
+            ολοκληρώθηκε
           </p>
-          <div className="bg-white/60 p-6 rounded-2xl border border-white/90 text-left">
-            <h2 className="text-lg font-semibold mb-4 text-[#1a1a1a]">Σύνοψη παραγγελίας</h2>
-            <div className="flex justify-between mb-2">
-              <span className="text-[#502e23]/70">Αριθμός παραγγελίας:</span>
-              <span className="font-medium">{order.order_number}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-[#502e23]/70">Σύνολο:</span>
-              <span className="font-semibold">{formatPrice(order.grand_total)}</span>
+          <h1 className="headline-md text-[#1a1a1a] mb-6">
+            σ&apos; ευχαριστούμε
+          </h1>
+          <p className="text-[#1a1a1a]/65 leading-relaxed mb-12 max-w-md">
+            Λάβαμε την πληρωμή σου. Email επιβεβαίωσης πάει
+            {order.customer_email ? (
+              <> στο <span className="text-[#1a1a1a]">{order.customer_email}</span></>
+            ) : (
+              <> στο email σου</>
+            )}.
+          </p>
+
+          <div className="border-t border-[#1a1a1a]/12 pt-6 space-y-4 text-sm">
+            <div className="flex items-baseline justify-between">
+              <span className="text-[11px] tracking-[0.22em] uppercase text-[#1a1a1a]/50">
+                αριθμός παραγγελίας
+              </span>
+              <span className="text-[#1a1a1a] tabular-nums">{order.order_number}</span>
             </div>
           </div>
-          <Button
-            onClick={() => router.push("/")}
-            className="mt-8 bg-[#1a1a1a] hover:bg-[#1a1a1a]/85 text-white"
-          >
-            Συνέχεια στις αγορές
-          </Button>
+
+          <div className="mt-6 pt-6 border-t border-[#1a1a1a] flex items-baseline justify-between gap-4">
+            <span className="text-[11px] tracking-[0.22em] uppercase text-[#1a1a1a]/50">
+              σύνολο
+            </span>
+            <span className="font-light text-[#1a1a1a] text-4xl md:text-5xl tabular-nums tracking-tight leading-none">
+              {formatPrice(order.grand_total)}
+            </span>
+          </div>
+
+          <div className="mt-12 flex flex-wrap gap-4">
+            <Link
+              href="/"
+              className="inline-flex items-center justify-center bg-[#1a1a1a] hover:bg-[#1a1a1a]/85 text-white text-sm tracking-[0.06em] uppercase px-8 h-12 transition-colors"
+            >
+              συνέχεια στις αγορές
+            </Link>
+            <Link
+              href="/contact"
+              className="inline-flex items-center text-xs tracking-[0.12em] uppercase text-[#1a1a1a]/60 hover:text-[#1a1a1a] border-b border-[#1a1a1a]/20 hover:border-[#1a1a1a] pb-1 transition-colors"
+            >
+              έχω απορία →
+            </Link>
+          </div>
         </div>
       )}
     </div>
@@ -116,8 +150,8 @@ export default function SuccessPage() {
   return (
     <Suspense
       fallback={
-        <div className="container mx-auto pt-32 pb-16 text-center">
-          <Loader2 className="h-8 w-8 animate-spin text-[#ff6b35] mx-auto" />
+        <div className="min-h-screen bg-[#fafaf7] flex items-center justify-center">
+          <Loader2 className="h-6 w-6 animate-spin text-[#1a1a1a]/60" />
         </div>
       }
     >
