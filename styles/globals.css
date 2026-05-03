@@ -5,7 +5,15 @@
 @custom-variant dark (&:is(.dark *));
 
 html {
+  /* Lock the page to its painted palette — without these, Android Chrome
+     "Auto Dark Theme" and Samsung Internet "Dark mode" remap our cream / bone
+     surfaces to dark grey and invert text. */
   color-scheme: light only;
+  forced-color-adjust: none;
+  background-color: #fafaf7;
+}
+html, body {
+  -webkit-color-scheme: light;
 }
 
 :root {

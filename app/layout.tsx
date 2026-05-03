@@ -55,7 +55,14 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: "#f7e7ce",
+  // Locked to the editorial bone surface so Android Chrome / Samsung Internet
+  // dark mode does not paint the system chrome (URL bar, status bar) dark
+  // while the page below stays light.
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#fafaf7" },
+    { media: "(prefers-color-scheme: dark)", color: "#fafaf7" },
+  ],
+  colorScheme: "light",
   width: "device-width",
   initialScale: 1,
 }
