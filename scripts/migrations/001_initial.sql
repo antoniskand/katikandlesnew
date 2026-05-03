@@ -228,11 +228,13 @@ create table if not exists newsletter_subscribers (
 );
 
 -- ============================================================
--- Admin users (id = Stack Auth user id, stored as text)
+-- Admin users (verified by NextAuth Credentials provider)
+-- password_hash is a bcrypt hash; never store plaintext passwords.
 -- ============================================================
 create table if not exists admin_users (
-  id text primary key,
+  id uuid primary key default gen_random_uuid(),
   email text not null unique,
+  password_hash text not null,
   display_name text,
   role text not null default 'admin' check (role in ('owner', 'admin', 'editor')),
   created_at timestamptz not null default now()

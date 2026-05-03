@@ -17,9 +17,9 @@ import {
   X,
   LayoutDashboard,
 } from "lucide-react"
-import { useUser } from "@stackframe/stack"
 import { cn } from "@/lib/utils"
 import { Logo } from "@/components/brand/logo"
+import { signOutAction } from "@/app/admin/login/actions"
 
 interface AdminUser {
   id: string
@@ -49,11 +49,10 @@ export function AdminShell({
 }) {
   const pathname = usePathname()
   const router = useRouter()
-  const stackUser = useUser()
   const [mobileOpen, setMobileOpen] = useState(false)
 
   const handleSignOut = async () => {
-    if (stackUser) await stackUser.signOut()
+    await signOutAction()
     router.replace("/admin/login")
     router.refresh()
   }

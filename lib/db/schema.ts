@@ -237,12 +237,13 @@ export const newsletterSubscribers = pgTable("newsletter_subscribers", {
 })
 
 // ============================================================
-// Admin users (linked to Stack Auth user id stored as text)
+// Admin users (NextAuth Credentials provider verifies against this)
 // ============================================================
 export const adminUsers = pgTable("admin_users", {
-  // Stack Auth user id (UUID-shaped string)
-  id: text("id").primaryKey(),
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
   email: text("email").notNull().unique(),
+  // bcrypt hash — never store the plaintext.
+  passwordHash: text("password_hash").notNull(),
   displayName: text("display_name"),
   // 'owner' | 'admin' | 'editor'
   role: text("role").notNull().default("admin"),

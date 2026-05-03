@@ -1,42 +1,34 @@
 // lib/auth.ts
-// Server-only auth helpers built on Stack Auth + the admin_users table.
+// Server-only helpers backed by NextAuth + admin_users.
 
 import "server-only"
 import { eq } from "drizzle-orm"
-import { stackServerApp } from "@/stack"
+import { auth } from "@/auth"
 import { db } from "@/lib/db"
 import { adminUsers, type AdminUser } from "@/lib/db/schema"
 
-/**
- * Get the currently signed-in Stack user (or null).
- * Use in server components / route handlers.
- */
+/** The current NextAuth session (or null). */
+export async function getSession() {
+  return await auth()
+}
+
+/** Quick boolean — is anyone signed in. */
 export async function getCurrentUser() {
-  return await stackServerApp.getUser()
+  const session = await auth()
+  return session?.user ?? null
 }
 
-/**
- * Get the current user *and* check it has an admin_users row.
- * Returns null if not signed in or not an admin.
- */
-export async function getAdminUser(): Promise<
-  (AdminUser & { stackId: string }) | null
-> {
-  const user = await stackServerApp.getUser()
-  if (!user) return null
-
-  // Look up by id (Stack user id stored as text)
+/** Look up the admin_users row for the current session. Null if not an admin. */
+export async function getAdminUser(): Promise<AdminUser | null> {
+  const session = await auth()
+  if (!session?.user?.email) return null
   const row = await db.query.adminUsers.findFirst({
-    where: eq(adminUsers.id, user.id),
+    where: eq(adminUsers.email, session.user.email),
   })
-  if (!row) return null
-
-  return { ...row, stackId: user.id }
+  return row ?? null
 }
 
-/**
- * Throw 401 if no admin session.
- */
+/** Throw if not admin (used in server-side guards). */
 export async function requireAdmin() {
   const admin = await getAdminUser()
   if (!admin) throw new Error("UNAUTHORIZED")

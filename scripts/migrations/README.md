@@ -2,10 +2,10 @@
 
 The schema is defined in **two equivalent places**:
 
-1. **`lib/db/schema.ts`** — Drizzle schema (TypeScript). This is the source of truth your code uses.
+1. **`lib/db/schema.ts`** — Drizzle schema (TypeScript). Source of truth for the app code.
 2. **`scripts/migrations/001_initial.sql`** — Plain SQL for first-time setup.
 
-You can pick one of two ways to apply changes to Neon.
+Pick one of two ways to apply changes to Neon.
 
 ---
 
@@ -33,21 +33,30 @@ In the Neon SQL Editor, paste & run `001_initial.sql`. This creates every table 
 
 ## After the schema is up — make yourself an admin
 
-You need a user in **Stack Auth** (Neon Auth dashboard → Auth → Users → invite/create).
-Note its `id` (a UUID-shaped string). Then in Neon SQL Editor:
+The app uses **NextAuth v5 Credentials** — username/password are stored in the
+`admin_users` table with a bcrypt hash. Two ways to seed the first admin:
 
-```sql
-insert into admin_users (id, email, display_name, role)
-values (
-  'STACK_USER_ID',         -- the user id from Stack Auth
-  'you@example.com',
-  'Antonis',
-  'owner'
-)
-on conflict (id) do update set role = 'owner';
+### A. With the script
+
+```bash
+pnpm tsx scripts/create-admin.ts you@example.com 'YourStrongPassword' 'Antonis' owner
 ```
 
-Now sign in at `/admin/login` — the layout will check `admin_users` and grant you access.
+### B. By hand in Neon SQL Editor
+
+1. Generate the bcrypt hash locally:
+   ```bash
+   node -e "console.log(require('bcryptjs').hashSync('YourStrongPassword', 12))"
+   ```
+2. Run:
+   ```sql
+   insert into admin_users (email, password_hash, display_name, role)
+   values ('you@example.com', '$2a$12$...', 'Antonis', 'owner')
+   on conflict (email)
+   do update set password_hash = excluded.password_hash, role = excluded.role;
+   ```
+
+Now sign in at `/admin/login`.
 
 ---
 
@@ -57,9 +66,11 @@ Set these in Vercel (and `.env.local` for local dev):
 
 ```
 DATABASE_URL=postgresql://...neon.tech/neondb?sslmode=require
-NEXT_PUBLIC_STACK_PROJECT_ID=...
-NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY=...
-STACK_SECRET_SERVER_KEY=...
+
+# NextAuth
+AUTH_SECRET=<openssl rand -base64 32>
+AUTH_TRUST_HOST=true
+NEXTAUTH_URL=https://katikandles.gr
 
 NEXT_PUBLIC_SITE_URL=https://katikandles.gr
 STRIPE_SECRET_KEY=sk_...

@@ -1,6 +1,6 @@
 # Deployment Guide — Kati Kandles
 
-Stack: **Next.js 15 + Drizzle + Neon Postgres + Stack Auth (Neon Auth) + Stripe + Vercel Blob**.
+Stack: **Next.js 15 + Drizzle + Neon Postgres + NextAuth (Auth.js v5) + Stripe + Vercel Blob**.
 
 ---
 
@@ -13,18 +13,21 @@ pnpm install
 ## 2) Set up Neon
 
 1. Δημιούργησε project στο [console.neon.tech](https://console.neon.tech).
-2. Πήγαινε στο **Auth** tab και ενεργοποίησε το **Neon Auth** (powered by Stack).
-3. Στο **Connection** tab, αντίγραψε το `DATABASE_URL` (postgresql://…).
+2. Στο **Connection** tab, αντίγραψε το `DATABASE_URL` (postgresql://…).
 
 Πρόσθεσε στο `.env.local`:
 
 ```
 DATABASE_URL=postgresql://USER:PASSWORD@HOST/neondb?sslmode=require
 
-NEXT_PUBLIC_STACK_PROJECT_ID=...
-NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY=...
-STACK_SECRET_SERVER_KEY=...
+# NextAuth — required
+AUTH_SECRET=<generate one with: openssl rand -base64 32>
+AUTH_TRUST_HOST=true
+NEXTAUTH_URL=http://localhost:3000   # or your production URL
 ```
+
+> **Σημείωση**: το `AUTH_SECRET` πρέπει να είναι τυχαίο string, ίδιο σε όλα τα environments
+> ενός deployment. Στο Vercel → Settings → Environment Variables.
 
 ## 3) Apply the schema
 
@@ -40,20 +43,28 @@ pnpm db:push
 
 ## 4) Δημιούργησε τον admin σου
 
-a. Στο Neon Auth (μέσω Stack dashboard) → Users → Create user (email + password).
-b. Σημείωσε το user `id`.
-c. Στο Neon SQL Editor:
+Έχεις **δύο επιλογές**:
 
-```sql
-insert into admin_users (id, email, display_name, role)
-values (
-  'STACK_USER_ID',
-  'you@example.com',
-  'Antonis',
-  'owner'
-)
-on conflict (id) do update set role = 'owner';
+### A. Με το script (συνιστάται)
+
+```bash
+# DATABASE_URL must be set
+pnpm tsx scripts/create-admin.ts you@example.com 'YourStrongPassword' 'Antonis' owner
 ```
+
+### B. Με το χέρι στο Neon SQL Editor
+
+1. Στο τερματικό σου, φτιάξε bcrypt hash:
+   ```bash
+   node -e "console.log(require('bcryptjs').hashSync('YourStrongPassword', 12))"
+   ```
+2. Πέρασε το στο SQL:
+   ```sql
+   insert into admin_users (email, password_hash, display_name, role)
+   values ('you@example.com', '$2a$12$...', 'Antonis', 'owner');
+   ```
+
+Μετά visit `/admin/login` και βάλε email + password.
 
 ## 5) Stripe
 
@@ -69,9 +80,9 @@ on conflict (id) do update set role = 'owner';
 NEXT_PUBLIC_SITE_URL=https://katikandles.gr
 
 DATABASE_URL=postgresql://...
-NEXT_PUBLIC_STACK_PROJECT_ID=...
-NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY=...
-STACK_SECRET_SERVER_KEY=...
+AUTH_SECRET=<random>
+AUTH_TRUST_HOST=true
+NEXTAUTH_URL=https://katikandles.gr
 
 STRIPE_SECRET_KEY=sk_live_...
 STRIPE_WEBHOOK_SECRET=whsec_...
@@ -85,8 +96,23 @@ BLOB_READ_WRITE_TOKEN=...
 Push στο `main` — Vercel κάνει auto-deploy. Στο πρώτο deploy:
 
 1. Verify ότι το build περνά (build logs).
-2. Visit `/admin/login` → sign in.
+2. Visit `/admin/login` → sign in με τα credentials που έβαλες στο βήμα 4.
 3. Verify ότι βλέπεις τα stats (αν δεν έχεις data, θα είναι 0/€0).
+
+---
+
+## CI: Neon preview branches per PR
+
+Έχει configure-αριστεί GitHub Actions workflow (`.github/workflows/neon_workflow.yml`) που:
+
+- σε κάθε PR δημιουργεί νέο Neon branch (`preview/pr-…`) με αντίγραφο της DB,
+- το διαγράφει όταν κλείσεις το PR.
+
+Για να δουλέψει, χρειάζονται GitHub Secrets / Variables στο repo:
+- `NEON_API_KEY` (secret)
+- `NEON_PROJECT_ID` (variable)
+
+Όταν συνδέθηκε το Neon με το GitHub, αυτά μπήκαν αυτόματα.
 
 ---
 
