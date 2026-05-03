@@ -337,16 +337,11 @@ export function EditorialProductView({ product }: EditorialProductViewProps) {
       {/* === DETAILS: numbered editorial accordion === */}
       <section className="bg-[#fafaf7] px-6 md:px-12 lg:px-16 py-20 md:py-28">
         <div className="max-w-4xl mx-auto">
-          <div className="grid md:grid-cols-[auto_1fr] gap-10 md:gap-16 mb-14 md:mb-20">
-            <p className="text-[11px] tracking-[0.22em] uppercase text-[#1a1a1a]/50 md:pt-2">
-              σημειώσεις
-            </p>
-            <h2 className="headline-md text-[#1a1a1a]">
-              όλα όσα θες
-              <br className="hidden md:block" />
-              να ξέρεις
-            </h2>
-          </div>
+          <h2 className="headline-md text-[#1a1a1a] mb-14 md:mb-20">
+            όλα όσα θες
+            <br className="hidden md:block" />
+            να ξέρεις
+          </h2>
 
           {(() => {
             const items: Array<{
