@@ -3,6 +3,9 @@ import { asc, desc } from "drizzle-orm"
 import { db } from "@/lib/db"
 import { drops } from "@/lib/db/schema"
 
+
+export const dynamic = "force-dynamic"
+
 function slugify(s: string) {
   return s
     .toLowerCase()

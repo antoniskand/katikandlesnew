@@ -2,6 +2,9 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getProduct } from "@/lib/db-queries"
 
+
+export const dynamic = "force-dynamic"
+
 interface Ctx { params: Promise<{ slug: string }> }
 
 export async function GET(_req: NextRequest, { params }: Ctx) {

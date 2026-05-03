@@ -3,6 +3,9 @@ import { eq } from "drizzle-orm"
 import { db } from "@/lib/db"
 import { pages } from "@/lib/db/schema"
 
+
+export const dynamic = "force-dynamic"
+
 interface Ctx {
   params: Promise<{ id: string }>
 }

@@ -1,6 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getProductById } from "@/lib/db-queries"
 
+
+export const dynamic = "force-dynamic"
+
 interface Ctx {
   params: Promise<{ id: string }>
 }

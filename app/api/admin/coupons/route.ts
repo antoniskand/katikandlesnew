@@ -3,6 +3,9 @@ import { desc } from "drizzle-orm"
 import { db } from "@/lib/db"
 import { coupons } from "@/lib/db/schema"
 
+
+export const dynamic = "force-dynamic"
+
 export async function GET() {
   const rows = await db.select().from(coupons).orderBy(desc(coupons.createdAt))
   return NextResponse.json(rows)

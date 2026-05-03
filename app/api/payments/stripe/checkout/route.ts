@@ -6,6 +6,9 @@ import { createOrder } from "@/lib/db-queries"
 import { db } from "@/lib/db"
 import { orders } from "@/lib/db/schema"
 
+
+export const dynamic = "force-dynamic"
+
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
 
 interface CheckoutBody {

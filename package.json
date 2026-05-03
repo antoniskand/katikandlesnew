@@ -29,6 +29,7 @@
     "@radix-ui/react-tabs": "latest",
     "@radix-ui/react-toast": "latest",
     "@radix-ui/react-tooltip": "latest",
+    "@react-email/render": "latest",
     "@stripe/stripe-js": "latest",
     "@tiptap/extension-image": "latest",
     "@tiptap/extension-link": "latest",

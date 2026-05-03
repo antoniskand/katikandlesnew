@@ -5,6 +5,9 @@ import { db } from "@/lib/db"
 import { orderItems, orders } from "@/lib/db/schema"
 import { decrementStock, incrementCouponUsage } from "@/lib/db-queries"
 
+
+export const dynamic = "force-dynamic"
+
 export const runtime = "nodejs"
 
 export async function POST(request: NextRequest) {

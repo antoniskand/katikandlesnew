@@ -3,6 +3,9 @@ import { desc } from "drizzle-orm"
 import { db } from "@/lib/db"
 import { newsletterSubscribers } from "@/lib/db/schema"
 
+
+export const dynamic = "force-dynamic"
+
 export async function GET() {
   const subs = await db
     .select()

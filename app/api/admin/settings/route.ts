@@ -1,6 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getSettings, setSetting } from "@/lib/db-queries"
 
+
+export const dynamic = "force-dynamic"
+
 export async function GET() {
   const map = await getSettings()
   return NextResponse.json(map)
