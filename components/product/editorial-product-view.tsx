@@ -37,6 +37,25 @@ interface EditorialProductViewProps {
   product: Product
 }
 
+// Per-attribute panel color so each product gets a distinct editorial feel.
+function panelColor(attrs: Record<string, unknown> = {}): string {
+  if (attrs.car_diffuser === "TRUE") return "#FFC107"
+  if (attrs.wax_melt === "TRUE") return "#F4D8C0"
+  if (attrs.fragrance_wardrobe === "TRUE") return "#7D947C"
+  if (attrs.candle === "TRUE") return "#FF7A00"
+  return "#F7E7CE"
+}
+
+// Pick a reasonable text/bg pair given the panel color.
+function isDarkPanel(hex: string): boolean {
+  const c = hex.replace("#", "")
+  if (c.length !== 6) return false
+  const r = parseInt(c.slice(0, 2), 16)
+  const g = parseInt(c.slice(2, 4), 16)
+  const b = parseInt(c.slice(4, 6), 16)
+  return 0.299 * r + 0.587 * g + 0.114 * b < 165
+}
+
 export function EditorialProductView({ product }: EditorialProductViewProps) {
   const [quantity, setQuantity] = useState(1)
   const [selectedVariants, setSelectedVariants] = useState<Record<string, string>>({})
@@ -53,11 +72,9 @@ export function EditorialProductView({ product }: EditorialProductViewProps) {
     product.stock_status === "in_stock" || (product.stock_level && product.stock_level > 0)
 
   const isCandle =
+    product.attributes?.candle === "TRUE" ||
     product.name.toLowerCase().includes("candle") ||
-    product.name.toLowerCase().includes("κερ") ||
-    product.categories.some(
-      (cat) => cat.name?.toLowerCase().includes("candle") || cat.name?.toLowerCase().includes("κερ"),
-    )
+    product.name.toLowerCase().includes("κερ")
 
   const toggleSection = (section: string) => {
     setOpenSections((prev) => {
@@ -68,266 +85,330 @@ export function EditorialProductView({ product }: EditorialProductViewProps) {
     })
   }
 
-  const bgLetter = product.name.charAt(0).toUpperCase()
+  const heroBg = panelColor(product.attributes)
+  const heroDark = isDarkPanel(heroBg)
+  const onPanel = heroDark ? "text-white" : "text-[#1a1a1a]"
+  const onPanelMuted = heroDark ? "text-white/70" : "text-[#1a1a1a]/65"
+
   const selectedImage =
     product.images[selectedImageIndex]?.file?.url ||
     product.images[selectedImageIndex]?.url ||
-    "/placeholder.svg?height=600&width=600"
+    "/placeholder.svg?height=800&width=800"
+
+  // Use just the slug's first word as the massive bg type — keeps it readable.
+  const bgWord = (product.slug.split("-")[0] || product.slug).slice(0, 14)
 
   return (
-    <div className="min-h-screen bg-background overflow-hidden w-full">
-      {/* Background letter */}
-      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        <motion.span
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 0.04 }}
-          transition={{ duration: 1 }}
-          className="absolute -right-[5vw] top-[10vh] text-[50vw] font-black leading-none text-foreground select-none"
-          style={{ fontFamily: "system-ui" }}
-        >
-          {bgLetter}
-        </motion.span>
-      </div>
-
-      <div className="relative z-10 pt-24 md:pt-32 pb-16">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-          className="px-4 md:px-12 mb-8"
-        >
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-foreground/60 hover:text-foreground transition-colors caption"
+    <div className="min-h-screen bg-[#fafaf7] overflow-x-hidden">
+      {/* === HERO: split panel === */}
+      <section className="relative">
+        <div className="grid lg:grid-cols-[1.05fr_1fr] min-h-[80vh]">
+          {/* LEFT: colored panel + image + massive bg type */}
+          <div
+            className="relative overflow-hidden flex items-center justify-center py-20 md:py-28 lg:py-0"
+            style={{ backgroundColor: heroBg }}
           >
-            <ArrowLeft className="w-4 h-4" />
-            back to shop
-          </Link>
-        </motion.div>
+            {/* Top breadcrumb */}
+            <Link
+              href="/"
+              className={`absolute top-6 left-6 md:top-8 md:left-10 z-20 inline-flex items-center gap-2 text-xs tracking-[0.18em] uppercase ${onPanelMuted} hover:${onPanel.replace("text-", "text-")} transition-colors`}
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              πίσω
+            </Link>
 
-        <div className="grid md:grid-cols-2 gap-8 md:gap-16 px-4 md:px-12 max-w-7xl mx-auto">
-          {/* Left: Image */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
-            className="relative"
-          >
-            <div className="md:sticky md:top-32">
-              <div className="relative aspect-square rounded-2xl overflow-hidden bg-white/30">
+            {/* Massive bg word */}
+            <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 pointer-events-none overflow-hidden">
+              <motion.div
+                initial={{ opacity: 0, x: -60 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 1 }}
+                className="-ml-[2vw]"
+              >
+                <span
+                  className={`block whitespace-nowrap font-light tracking-tighter leading-none lowercase ${
+                    heroDark ? "text-white" : "text-[#1a1a1a]"
+                  }`}
+                  style={{
+                    fontSize: "clamp(8rem, 22vw, 22rem)",
+                    opacity: 0.08,
+                  }}
+                >
+                  {bgWord}
+                </span>
+              </motion.div>
+            </div>
+
+            {/* Image */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.7 }}
+              className="relative z-10 w-full max-w-md md:max-w-lg lg:max-w-xl px-8"
+            >
+              <div className="relative aspect-square">
                 <Image
                   src={selectedImage}
                   alt={product.name}
                   fill
-                  className="object-contain"
+                  className="object-contain drop-shadow-[0_30px_40px_rgba(0,0,0,0.25)]"
                   priority
-                  sizes="(max-width: 768px) 100vw, 50vw"
+                  sizes="(max-width: 1024px) 90vw, 45vw"
                 />
+              </div>
+            </motion.div>
+
+            {/* Sale badge */}
+            {isOnSale && (
+              <span className="absolute top-6 right-6 md:top-8 md:right-10 z-20 text-[10px] tracking-[0.2em] uppercase bg-[#1a1a1a] text-white px-3 py-1.5">
+                sale
+              </span>
+            )}
+          </div>
+
+          {/* RIGHT: info column */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="bg-[#fafaf7] flex flex-col justify-center px-6 md:px-12 lg:px-16 py-12 lg:py-20 min-w-0"
+          >
+            <div className="max-w-md w-full">
+              {/* Category eyebrow */}
+              {product.categories.length > 0 && (
+                <p className="text-[11px] tracking-[0.22em] uppercase text-[#1a1a1a]/50 mb-5">
+                  {product.categories[0].name}
+                </p>
+              )}
+
+              {/* Name */}
+              <h1 className="headline-lg text-[#1a1a1a] mb-8 break-words">
+                {product.name}
+              </h1>
+
+              {/* Price */}
+              <div className="flex items-baseline gap-3 mb-2">
+                <span className="font-light text-[#1a1a1a] text-5xl md:text-6xl tabular-nums tracking-tight leading-none">
+                  {formatPrice(displayPrice)}
+                </span>
                 {isOnSale && (
-                  <span className="absolute top-5 left-5 text-[10px] uppercase tracking-widest font-medium bg-[#1a1a1a] text-white px-3 py-1.5 rounded-full">
-                    sale
+                  <span className="text-lg text-[#1a1a1a]/40 line-through tabular-nums">
+                    {formatPrice(product.price)}
                   </span>
                 )}
               </div>
+              <p className="text-xs text-[#1a1a1a]/50 mb-10">
+                {isInStock ? (
+                  <span className="inline-flex items-center gap-2">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#0f9b81]" />
+                    διαθέσιμο · αποστολή 1–3 εργάσιμες
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-2">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[#1a1a1a]/30" />
+                    εξαντλημένο
+                  </span>
+                )}
+              </p>
 
-              {product.images.length > 1 && (
-                <div className="flex gap-3 mt-4 overflow-x-auto pb-2">
-                  {product.images.map((image, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setSelectedImageIndex(index)}
-                      className={`relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-colors ${
-                        selectedImageIndex === index
-                          ? "border-primary"
-                          : "border-transparent hover:border-primary/30"
-                      }`}
-                    >
-                      <Image
-                        src={image.file?.url || image.url || "/placeholder.svg?height=80&width=80"}
-                        alt={image.caption || `${product.name} ${index + 1}`}
-                        fill
-                        className="object-contain"
-                        sizes="80px"
-                      />
-                    </button>
+              {/* Variants */}
+              {product.variants && product.variants.length > 0 && (
+                <div className="space-y-5 mb-8">
+                  {product.variants.map((variant) => (
+                    <div key={variant.id}>
+                      <p className="text-[11px] tracking-[0.2em] uppercase text-[#1a1a1a]/50 mb-3">
+                        {variant.name}
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {(variant.values || []).map((value) => {
+                          const active = selectedVariants[variant.id] === value.id
+                          return (
+                            <button
+                              key={value.id}
+                              onClick={() =>
+                                setSelectedVariants((prev) => ({
+                                  ...prev,
+                                  [variant.id]: value.id,
+                                }))
+                              }
+                              className={`px-4 py-2 text-sm border transition-colors ${
+                                active
+                                  ? "border-[#1a1a1a] bg-[#1a1a1a] text-white"
+                                  : "border-[#1a1a1a]/20 text-[#1a1a1a] hover:border-[#1a1a1a]"
+                              }`}
+                            >
+                              {value.name}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
                   ))}
                 </div>
               )}
-            </div>
-          </motion.div>
 
-          {/* Right: Info */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.15 }}
-            className="flex flex-col min-w-0"
-          >
-            {product.categories.length > 0 && (
-              <span className="caption text-[#ff6b35] mb-4">
-                {product.categories[0].name}
-              </span>
-            )}
-
-            <h1 className="headline-lg text-foreground mb-6 break-words">{product.name}</h1>
-
-            <div className="flex items-baseline gap-4 mb-8">
-              <span className="text-4xl font-bold text-foreground">
-                {formatPrice(displayPrice)}
-              </span>
-              {isOnSale && (
-                <span className="text-xl text-foreground/40 line-through">
-                  {formatPrice(product.price)}
-                </span>
-              )}
-            </div>
-
-            {/* Variants */}
-            {product.variants && product.variants.length > 0 && (
-              <div className="space-y-4 mb-6">
-                {product.variants.map((variant) => (
-                  <div key={variant.id}>
-                    <label className="caption text-foreground mb-2 block">
-                      {variant.name}
-                    </label>
-                    <div className="flex flex-wrap gap-2">
-                      {(variant.values || []).map((value) => (
-                        <button
-                          key={value.id}
-                          onClick={() =>
-                            setSelectedVariants((prev) => ({
-                              ...prev,
-                              [variant.id]: value.id,
-                            }))
-                          }
-                          className={`px-4 py-2 rounded-full border-2 transition-all ${
-                            selectedVariants[variant.id] === value.id
-                              ? "border-primary bg-primary text-primary-foreground"
-                              : "border-foreground/20 text-foreground hover:border-foreground/40"
-                          }`}
-                        >
-                          {value.name}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* Quantity + Add to cart */}
-            <div className="flex flex-col gap-4 mb-8">
-              <div className="inline-flex items-center border-2 border-foreground/20 rounded-full self-start">
-                <button
-                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                  disabled={quantity <= 1}
-                  className="p-3 text-foreground hover:bg-foreground/5 transition-colors disabled:opacity-30 rounded-l-full"
-                  aria-label="Μείωση"
-                >
-                  <Minus className="w-4 h-4" />
-                </button>
-                <span className="px-6 py-2 text-foreground font-medium min-w-[3rem] text-center">
-                  {quantity}
-                </span>
-                <button
-                  onClick={() => setQuantity(quantity + 1)}
-                  className="p-3 text-foreground hover:bg-foreground/5 transition-colors rounded-r-full"
-                  aria-label="Αύξηση"
-                >
-                  <Plus className="w-4 h-4" />
-                </button>
-              </div>
-
-              {isInStock ? (
-                <AddToCartButton
-                  productId={product.id}
-                  quantity={quantity}
-                  variantId={Object.values(selectedVariants)[0]}
-                  productData={{
-                    name: product.name,
-                    slug: product.slug,
-                    price: product.price,
-                    sale_price: product.sale_price,
-                    currency: product.currency,
-                    images: product.images.map((img) => ({
-                      url: img.file?.url || img.url || "",
-                      alt: img.caption || "",
-                    })),
-                  }}
-                  className="w-full bg-primary hover:bg-primary/90 text-primary-foreground py-4 rounded-full text-base font-medium tracking-wide uppercase transition-colors"
-                />
-              ) : (
-                <Button
-                  disabled
-                  className="w-full bg-foreground/30 text-white py-4 rounded-full text-base font-medium cursor-not-allowed"
-                >
-                  Out of Stock
-                </Button>
-              )}
-            </div>
-
-            {/* Collapsible sections */}
-            <div className="border-t border-foreground/10 mt-2">
-              {product.description && (
-                <Section
-                  title="Περιγραφή"
-                  open={openSections.has("description")}
-                  onToggle={() => toggleSection("description")}
-                >
-                  <div
-                    className="body-md text-foreground/75 prose prose-sm max-w-none prose-p:text-foreground/75"
-                    dangerouslySetInnerHTML={{ __html: product.description }}
-                  />
-                </Section>
-              )}
-
-              {isCandle && (
-                <Section
-                  title="Οδηγίες Καύσης"
-                  open={openSections.has("burning")}
-                  onToggle={() => toggleSection("burning")}
-                >
-                  <div className="text-foreground/75 body-sm space-y-4">
-                    <p className="font-medium text-foreground">
-                      Για να κρατήσει το κερί σου όσο περισσότερο γίνεται:
-                    </p>
-                    <ul className="space-y-3 list-disc pl-5">
-                      <li>
-                        <strong>Πρώτη φορά;</strong> Άναψέ το και άφησέ το να λιώσει ομοιόμορφα μέχρι την άκρη — ιδανικά τουλάχιστον 1 ώρα.
-                      </li>
-                      <li>
-                        <strong>Μετά;</strong> Κάθε καύση μπορεί να διαρκεί έως 3 ώρες. Έτσι κρατάς το άρωμα έντονο και το κερί σε φόρμα.
-                      </li>
-                      <li>
-                        <strong>Το φυτίλι θέλει αγάπη.</strong> Πριν από κάθε χρήση, κόψε το στα 5mm. Θα καίει καλύτερα, χωρίς μεγάλη φλόγα ή καπνό.
-                      </li>
-                      <li>
-                        <strong>Το καλύτερο;</strong> Όσο καίει, πάρε λίγο λιωμένο κερί στο δάχτυλό σου και άπλωσέ το στα χέρια. Είναι skin-safe και λειτουργεί σαν βελούδινη κρέμα χεριών.
-                      </li>
-                    </ul>
-                  </div>
-                </Section>
-              )}
-
-              <Section
-                title="Αποστολές & Επιστροφές"
-                open={openSections.has("shipping")}
-                onToggle={() => toggleSection("shipping")}
-              >
-                <div className="text-foreground/75 body-sm space-y-2">
-                  <p>Δωρεάν αποστολή για παραγγελίες άνω των 30€ εντός Ελλάδας.</p>
-                  <p>Αποστολή σε 1-3 εργάσιμες με Courier ή BoxNow.</p>
-                  <p>
-                    <Link href="/shipping-returns" className="underline text-[#ff6b35]">
-                      Δες αναλυτικά τους όρους →
-                    </Link>
-                  </p>
+              {/* Quantity + add to cart row */}
+              <div className="flex items-stretch gap-3 mb-10">
+                <div className="inline-flex items-center border border-[#1a1a1a]/20">
+                  <button
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                    disabled={quantity <= 1}
+                    className="px-3 h-12 text-[#1a1a1a] hover:bg-[#1a1a1a]/5 disabled:opacity-30 transition-colors"
+                    aria-label="Μείωση"
+                  >
+                    <Minus className="w-3.5 h-3.5" />
+                  </button>
+                  <span className="px-4 h-12 inline-flex items-center text-[#1a1a1a] tabular-nums min-w-[2.5rem] justify-center">
+                    {quantity}
+                  </span>
+                  <button
+                    onClick={() => setQuantity(quantity + 1)}
+                    className="px-3 h-12 text-[#1a1a1a] hover:bg-[#1a1a1a]/5 transition-colors"
+                    aria-label="Αύξηση"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                  </button>
                 </div>
-              </Section>
+
+                {isInStock ? (
+                  <AddToCartButton
+                    productId={product.id}
+                    quantity={quantity}
+                    variantId={Object.values(selectedVariants)[0]}
+                    productData={{
+                      name: product.name,
+                      slug: product.slug,
+                      price: product.price,
+                      sale_price: product.sale_price,
+                      currency: product.currency,
+                      images: product.images.map((img) => ({
+                        url: img.file?.url || img.url || "",
+                        alt: img.caption || "",
+                      })),
+                    }}
+                    className="flex-1 h-12 bg-[#1a1a1a] hover:bg-[#1a1a1a]/85 text-white text-sm tracking-[0.06em] uppercase transition-colors"
+                  />
+                ) : (
+                  <Button
+                    disabled
+                    className="flex-1 h-12 bg-[#1a1a1a]/30 text-white text-sm tracking-[0.06em] uppercase cursor-not-allowed"
+                  >
+                    εξαντλημένο
+                  </Button>
+                )}
+              </div>
+
+              {/* Thumbnails — desktop sits in info column to keep hero clean */}
+              {product.images.length > 1 && (
+                <div className="flex gap-2 pb-1">
+                  {product.images.map((image, index) => {
+                    const url = image.file?.url || image.url
+                    if (!url) return null
+                    const active = selectedImageIndex === index
+                    return (
+                      <button
+                        key={index}
+                        onClick={() => setSelectedImageIndex(index)}
+                        className={`relative w-16 h-16 flex-shrink-0 overflow-hidden border transition-colors ${
+                          active
+                            ? "border-[#1a1a1a]"
+                            : "border-[#1a1a1a]/15 hover:border-[#1a1a1a]/40"
+                        }`}
+                        style={{ backgroundColor: heroBg }}
+                        aria-label={`Image ${index + 1}`}
+                      >
+                        <Image
+                          src={url}
+                          alt={image.caption || `${product.name} ${index + 1}`}
+                          fill
+                          className="object-contain"
+                          sizes="64px"
+                        />
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
             </div>
           </motion.div>
         </div>
-      </div>
+      </section>
+
+      {/* === DETAILS: collapsible sections === */}
+      <section className="bg-[#fafaf7] px-6 md:px-12 lg:px-16 py-16 md:py-24">
+        <div className="max-w-3xl">
+          <p className="text-[11px] tracking-[0.22em] uppercase text-[#1a1a1a]/50 mb-2">
+            details
+          </p>
+          <h2 className="headline-md text-[#1a1a1a] mb-10">όλα όσα θες να ξέρεις</h2>
+
+          <div className="border-t border-[#1a1a1a]/12">
+            {product.description && (
+              <Section
+                title="περιγραφή"
+                open={openSections.has("description")}
+                onToggle={() => toggleSection("description")}
+              >
+                <div
+                  className="text-[#1a1a1a]/75 leading-relaxed prose prose-sm max-w-none prose-p:text-[#1a1a1a]/75 prose-strong:text-[#1a1a1a] prose-a:text-[#ff6b35]"
+                  dangerouslySetInnerHTML={{ __html: product.description }}
+                />
+              </Section>
+            )}
+
+            {isCandle && (
+              <Section
+                title="οδηγίες καύσης"
+                open={openSections.has("burning")}
+                onToggle={() => toggleSection("burning")}
+              >
+                <div className="text-[#1a1a1a]/75 space-y-4 leading-relaxed">
+                  <p className="text-[#1a1a1a]">
+                    Για να κρατήσει το κερί σου όσο περισσότερο γίνεται:
+                  </p>
+                  <ul className="space-y-3 list-disc pl-5 text-sm">
+                    <li>
+                      <strong className="text-[#1a1a1a]">Πρώτη φορά;</strong> Άναψέ το και
+                      άφησέ το να λιώσει ομοιόμορφα μέχρι την άκρη — ιδανικά τουλάχιστον 1 ώρα.
+                    </li>
+                    <li>
+                      <strong className="text-[#1a1a1a]">Μετά;</strong> Κάθε καύση μπορεί να
+                      διαρκεί έως 3 ώρες. Έτσι κρατάς το άρωμα έντονο και το κερί σε φόρμα.
+                    </li>
+                    <li>
+                      <strong className="text-[#1a1a1a]">Το φυτίλι θέλει αγάπη.</strong> Πριν
+                      από κάθε χρήση, κόψε το στα 5mm — καίει καλύτερα, χωρίς μεγάλη φλόγα ή καπνό.
+                    </li>
+                    <li>
+                      <strong className="text-[#1a1a1a]">Το καλύτερο;</strong> Όσο καίει, πάρε
+                      λίγο λιωμένο κερί στο δάχτυλο και άπλωσέ το στα χέρια. Skin-safe — λειτουργεί σαν βελούδινη κρέμα.
+                    </li>
+                  </ul>
+                </div>
+              </Section>
+            )}
+
+            <Section
+              title="αποστολές & επιστροφές"
+              open={openSections.has("shipping")}
+              onToggle={() => toggleSection("shipping")}
+            >
+              <div className="text-[#1a1a1a]/75 space-y-2 text-sm leading-relaxed">
+                <p>Δωρεάν αποστολή για παραγγελίες άνω των 30€ εντός Ελλάδας.</p>
+                <p>Αποστολή σε 1-3 εργάσιμες με Courier ή BoxNow.</p>
+                <p>
+                  <Link
+                    href="/shipping-returns"
+                    className="text-[#1a1a1a] border-b border-[#1a1a1a]/30 hover:border-[#1a1a1a] pb-0.5"
+                  >
+                    Αναλυτικοί όροι →
+                  </Link>
+                </p>
+              </div>
+            </Section>
+          </div>
+        </div>
+      </section>
     </div>
   )
 }
@@ -344,14 +425,16 @@ function Section({
   children: React.ReactNode
 }) {
   return (
-    <div className="border-b border-foreground/10">
+    <div className="border-b border-[#1a1a1a]/12">
       <button
         onClick={onToggle}
-        className="w-full flex items-center justify-between py-5 text-left"
+        className="w-full flex items-center justify-between py-5 text-left group"
       >
-        <span className="font-medium text-foreground">{title}</span>
+        <span className="text-[#1a1a1a] text-base group-hover:opacity-70 transition-opacity">
+          {title}
+        </span>
         <ChevronDown
-          className={`w-5 h-5 text-foreground/60 transition-transform ${open ? "rotate-180" : ""}`}
+          className={`w-4 h-4 text-[#1a1a1a]/50 transition-transform ${open ? "rotate-180" : ""}`}
         />
       </button>
       <AnimatePresence initial={false}>
@@ -363,7 +446,7 @@ function Section({
             transition={{ duration: 0.25 }}
             className="overflow-hidden"
           >
-            <div className="pb-5">{children}</div>
+            <div className="pb-6">{children}</div>
           </motion.div>
         )}
       </AnimatePresence>
