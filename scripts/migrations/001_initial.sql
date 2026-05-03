@@ -228,16 +228,55 @@ create table if not exists newsletter_subscribers (
 );
 
 -- ============================================================
--- Admin users (verified by NextAuth Credentials provider)
--- password_hash is a bcrypt hash; never store plaintext passwords.
+-- Admin allowlist — only emails here can sign in.
+-- Magic-link auth uses NextAuth (next-auth) — no password stored.
 -- ============================================================
 create table if not exists admin_users (
   id uuid primary key default gen_random_uuid(),
   email text not null unique,
-  password_hash text not null,
   display_name text,
   role text not null default 'admin' check (role in ('owner', 'admin', 'editor')),
   created_at timestamptz not null default now()
+);
+
+-- ============================================================
+-- NextAuth (Auth.js) tables — required by @auth/drizzle-adapter.
+-- Quoted identifiers preserve the camelCase column names that the adapter expects.
+-- ============================================================
+create table if not exists "users" (
+  id text primary key,
+  name text,
+  email text unique,
+  "emailVerified" timestamp,
+  image text
+);
+
+create table if not exists accounts (
+  "userId" text not null references "users"(id) on delete cascade,
+  type text not null,
+  provider text not null,
+  "providerAccountId" text not null,
+  refresh_token text,
+  access_token text,
+  expires_at int,
+  token_type text,
+  scope text,
+  id_token text,
+  session_state text,
+  primary key (provider, "providerAccountId")
+);
+
+create table if not exists sessions (
+  "sessionToken" text primary key,
+  "userId" text not null references "users"(id) on delete cascade,
+  expires timestamp not null
+);
+
+create table if not exists "verificationToken" (
+  identifier text not null,
+  token text not null,
+  expires timestamp not null,
+  primary key (identifier, token)
 );
 
 -- ============================================================

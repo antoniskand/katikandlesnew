@@ -237,18 +237,69 @@ export const newsletterSubscribers = pgTable("newsletter_subscribers", {
 })
 
 // ============================================================
-// Admin users (NextAuth Credentials provider verifies against this)
+// Admin allowlist — only emails listed here can sign in.
+// Magic-link auth verifies the email belongs to this table; no password.
 // ============================================================
 export const adminUsers = pgTable("admin_users", {
   id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
   email: text("email").notNull().unique(),
-  // bcrypt hash — never store the plaintext.
-  passwordHash: text("password_hash").notNull(),
   displayName: text("display_name"),
   // 'owner' | 'admin' | 'editor'
   role: text("role").notNull().default("admin"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 })
+
+// ============================================================
+// NextAuth (Auth.js) tables — required by @auth/drizzle-adapter.
+// Used for magic-link verification + JWT-backed sessions.
+// ============================================================
+export const users = pgTable("users", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  name: text("name"),
+  email: text("email").unique(),
+  emailVerified: timestamp("emailVerified", { mode: "date" }),
+  image: text("image"),
+})
+
+export const accounts = pgTable(
+  "accounts",
+  {
+    userId: text("userId")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    type: text("type").notNull(),
+    provider: text("provider").notNull(),
+    providerAccountId: text("providerAccountId").notNull(),
+    refresh_token: text("refresh_token"),
+    access_token: text("access_token"),
+    expires_at: integer("expires_at"),
+    token_type: text("token_type"),
+    scope: text("scope"),
+    id_token: text("id_token"),
+    session_state: text("session_state"),
+  },
+  (t) => [primaryKey({ columns: [t.provider, t.providerAccountId] })],
+)
+
+export const sessions = pgTable("sessions", {
+  sessionToken: text("sessionToken").primaryKey(),
+  userId: text("userId")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  expires: timestamp("expires", { mode: "date" }).notNull(),
+})
+
+export const verificationTokens = pgTable(
+  "verificationToken",
+  {
+    identifier: text("identifier").notNull(),
+    token: text("token").notNull(),
+    expires: timestamp("expires", { mode: "date" }).notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.identifier, t.token] })],
+)
 
 // ============================================================
 // Site settings (key/value)

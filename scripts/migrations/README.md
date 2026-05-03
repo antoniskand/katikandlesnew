@@ -33,30 +33,24 @@ In the Neon SQL Editor, paste & run `001_initial.sql`. This creates every table 
 
 ## After the schema is up — make yourself an admin
 
-The app uses **NextAuth v5 Credentials** — username/password are stored in the
-`admin_users` table with a bcrypt hash. Two ways to seed the first admin:
+The app uses **NextAuth v5 magic-link** auth via Resend. Add the email to the
+allowlist (no password):
 
 ### A. With the script
 
 ```bash
-pnpm tsx scripts/create-admin.ts you@example.com 'YourStrongPassword' 'Antonis' owner
+pnpm tsx scripts/create-admin.ts you@example.com 'Antonis' owner
 ```
 
 ### B. By hand in Neon SQL Editor
 
-1. Generate the bcrypt hash locally:
-   ```bash
-   node -e "console.log(require('bcryptjs').hashSync('YourStrongPassword', 12))"
-   ```
-2. Run:
-   ```sql
-   insert into admin_users (email, password_hash, display_name, role)
-   values ('you@example.com', '$2a$12$...', 'Antonis', 'owner')
-   on conflict (email)
-   do update set password_hash = excluded.password_hash, role = excluded.role;
-   ```
+```sql
+insert into admin_users (email, display_name, role)
+values ('you@example.com', 'Antonis', 'owner')
+on conflict (email) do update set role = 'owner';
+```
 
-Now sign in at `/admin/login`.
+Now visit `/admin/login`, give the email, click the link in your inbox.
 
 ---
 
@@ -71,6 +65,10 @@ DATABASE_URL=postgresql://...neon.tech/neondb?sslmode=require
 AUTH_SECRET=<openssl rand -base64 32>
 AUTH_TRUST_HOST=true
 NEXTAUTH_URL=https://katikandles.gr
+
+# Resend (magic links)
+AUTH_RESEND_KEY=re_...
+AUTH_RESEND_FROM="Kati Kandles <auth@katikandles.gr>"
 
 NEXT_PUBLIC_SITE_URL=https://katikandles.gr
 STRIPE_SECRET_KEY=sk_...
