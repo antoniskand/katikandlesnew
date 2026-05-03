@@ -6,7 +6,7 @@ import { FeaturesSection } from "@/components/features-section"
 import { AboutSection } from "@/components/about-section"
 import { NewsletterSection } from "@/components/newsletter-section"
 import type { Product } from "@/types/product"
-import { getProducts, getFeaturedDrop } from "@/lib/db-queries"
+import { getProducts, getFeaturedDrop, getPage } from "@/lib/db-queries"
 
 export const revalidate = 60
 
@@ -17,14 +17,16 @@ export default async function Home() {
   let waxMeltProducts: Product[] = []
   let drop = null
   let dropProducts: Product[] = []
+  let aboutHtml: string | null = null
 
   try {
-    const [candleData, fragranceData, carFragranceData, waxMeltData, featured] = await Promise.all([
+    const [candleData, fragranceData, carFragranceData, waxMeltData, featured, about] = await Promise.all([
       getProducts({ limit: 50, category: "candles" }).catch(() => ({ results: [], count: 0 })),
       getProducts({ limit: 50, category: "aromatics" }).catch(() => ({ results: [], count: 0 })),
       getProducts({ limit: 50, category: "car-diffuser" }).catch(() => ({ results: [], count: 0 })),
       getProducts({ limit: 50, category: "wax-melts" }).catch(() => ({ results: [], count: 0 })),
       getFeaturedDrop().catch(() => ({ drop: null, products: [] })),
+      getPage("about-us").catch(() => null),
     ])
 
     candleProducts = candleData?.results || []
@@ -33,6 +35,7 @@ export default async function Home() {
     waxMeltProducts = waxMeltData?.results || []
     drop = featured.drop
     dropProducts = featured.products
+    aboutHtml = about?.content || null
   } catch (error) {
     console.error("Error in home page:", error)
   }
@@ -48,7 +51,7 @@ export default async function Home() {
         waxMeltProducts={waxMeltProducts}
       />
       <FeaturesSection />
-      <AboutSection />
+      <AboutSection contentHtml={aboutHtml} />
       <NewsletterSection />
     </div>
   )

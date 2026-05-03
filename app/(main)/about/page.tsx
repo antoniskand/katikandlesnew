@@ -1,5 +1,8 @@
 import type { Metadata } from "next"
+import { getPage } from "@/lib/db-queries"
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld"
+
+export const revalidate = 60
 
 export const metadata: Metadata = {
   title: "Η ιστορία μας",
@@ -8,7 +11,9 @@ export const metadata: Metadata = {
   alternates: { canonical: "/about" },
 }
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  const page = await getPage("about-us").catch(() => null)
+
   return (
     <main className="bg-[#fafaf7] pt-28 md:pt-36 pb-24">
       <BreadcrumbJsonLd
@@ -22,44 +27,20 @@ export default function AboutPage() {
           our story
         </p>
         <h1 className="headline-md text-[#1a1a1a] mb-14">
-          kati diko mas
+          {page?.name || "kati diko mas"}
         </h1>
 
-        <article className="space-y-6 text-[#1a1a1a]/80 text-lg leading-relaxed">
-          <p>
-            Το Kati Kandles γεννήθηκε μέσα από μια ανάγκη και όχι από μια
-            επιχειρηματική στρατηγική. Κατά τη διάρκεια μιας απαιτητικής
-            εξεταστικής περιόδου, ο δημιουργός του αναζητούσε έναν τρόπο να
-            κάνει ένα δημιουργικό διάλειμμα — να μάθει κάτι καινούριο και να
-            δημιουργήσει με τα χέρια του. Έτσι ξεκίνησε να φτιάχνει κεριά:
-            αρχικά για φίλους που είχε καιρό να δει, και για τον ίδιο.
-          </p>
-          <p>
-            Με υπόβαθρο στα μαθηματικά, ανακάλυψε μέσα από το κερί μια νέα
-            εξίσωση: δημιουργικότητα, επιχειρηματικότητα, αναμνήσεις. Πολύ
-            σύντομα, το Kati Kandles εξελίχθηκε σε κάτι περισσότερο από ένα
-            χόμπι.
-          </p>
-          <p>
-            Φωτογραφίσεις, διαχείριση social media, εξυπηρέτηση πελατών,
-            συσκευασία και επαγγελματική συνέπεια έγιναν καθημερινά
-            στοιχήματα. Ένα project που ξεκίνησε από έναν φοιτητή χωρίς
-            εμπειρία στις επιχειρήσεις, αλλά με ξεκάθαρο όραμα.
-          </p>
-          <p>
-            Σήμερα, κάθε κερί του Kati Kandles αφηγείται μια ιστορία. Δεν
-            είναι απλώς αντικείμενα: είναι γέφυρες που μεταφέρουν τον καθένα
-            σε μια άλλη εποχή. Όταν κάποιος ανοίγει ένα κερί Kati Kandles, ο
-            χρόνος μοιάζει να επιβραδύνει. Η μνήμη ενεργοποιείται και ξεκινά
-            ένα ταξίδι στην αγνότητα της παιδικής ηλικίας: στα παγωτά του
-            χωριού, στα καλοκαιρινά φρούτα, στα φρεσκοπλυμένα σεντόνια.
-          </p>
-          <p>
-            Το Kati Kandles συνδέει ανθρώπους μέσα από κοινές αναμνήσεις και
-            γνώριμες μυρωδιές. Είναι μια εμπειρία που ξυπνά κάτι αληθινό,
-            κάτι δικό μας.
-          </p>
-        </article>
+        <article
+          className="prose prose-lg max-w-none text-[#1a1a1a]/80
+            prose-headings:text-[#1a1a1a] prose-headings:font-normal
+            prose-h2:tracking-tight prose-h2:lowercase prose-h2:text-3xl prose-h2:mt-12
+            prose-h3:tracking-tight prose-h3:text-xl prose-h3:mt-10 prose-h3:mb-4
+            prose-strong:text-[#1a1a1a]
+            prose-a:text-[#1a1a1a] prose-a:underline prose-a:underline-offset-4
+            prose-li:my-1
+            prose-p:leading-relaxed"
+          dangerouslySetInnerHTML={{ __html: page?.content || FALLBACK }}
+        />
 
         <div className="mt-20 pt-10 border-t border-[#1a1a1a]/12">
           <p className="text-[11px] tracking-[0.22em] uppercase text-[#1a1a1a]/50 mb-2">
@@ -87,3 +68,12 @@ export default function AboutPage() {
     </main>
   )
 }
+
+// Used only if the DB row is missing (won't normally happen — see admin Pages).
+const FALLBACK = `
+<p>Το Kati Kandles γεννήθηκε μέσα από μια ανάγκη και όχι από μια επιχειρηματική στρατηγική. Κατά τη διάρκεια μιας απαιτητικής εξεταστικής περιόδου, ο δημιουργός του αναζητούσε έναν τρόπο να κάνει ένα δημιουργικό διάλειμμα — να μάθει κάτι καινούριο και να δημιουργήσει με τα χέρια του. Έτσι ξεκίνησε να φτιάχνει κεριά: αρχικά για φίλους που είχε καιρό να δει, και για τον ίδιο.</p>
+<p>Με υπόβαθρο στα μαθηματικά, ανακάλυψε μέσα από το κερί μια νέα εξίσωση: δημιουργικότητα, επιχειρηματικότητα, αναμνήσεις. Πολύ σύντομα, το Kati Kandles εξελίχθηκε σε κάτι περισσότερο από ένα χόμπι.</p>
+<p>Φωτογραφίσεις, διαχείριση social media, εξυπηρέτηση πελατών, συσκευασία και επαγγελματική συνέπεια έγιναν καθημερινά στοιχήματα. Ένα project που ξεκίνησε από έναν φοιτητή χωρίς εμπειρία στις επιχειρήσεις, αλλά με ξεκάθαρο όραμα.</p>
+<p>Σήμερα, κάθε κερί του Kati Kandles αφηγείται μια ιστορία. Δεν είναι απλώς αντικείμενα: είναι γέφυρες που μεταφέρουν τον καθένα σε μια άλλη εποχή.</p>
+<p>Το Kati Kandles συνδέει ανθρώπους μέσα από κοινές αναμνήσεις και γνώριμες μυρωδιές. Είναι μια εμπειρία που ξυπνά κάτι αληθινό, κάτι δικό μας.</p>
+`
