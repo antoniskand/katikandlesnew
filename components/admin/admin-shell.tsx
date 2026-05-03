@@ -58,9 +58,9 @@ export function AdminShell({
   }
 
   return (
-    <div className="min-h-screen bg-[#f7e7ce] flex">
+    <div className="min-h-screen bg-[#fafaf7] flex">
       {/* Sidebar — desktop */}
-      <aside className="hidden lg:flex lg:w-64 lg:flex-col bg-white border-r-2 border-[#1a1a1a]/10 sticky top-0 h-screen">
+      <aside className="hidden lg:flex lg:w-60 lg:flex-col bg-white border-r border-[#1a1a1a]/8 sticky top-0 h-screen">
         <SidebarContent
           admin={admin}
           pathname={pathname}
@@ -73,11 +73,11 @@ export function AdminShell({
       {mobileOpen && (
         <div className="lg:hidden fixed inset-0 z-50 flex">
           <div
-            className="fixed inset-0 bg-[#1a1a1a]/50 backdrop-blur-sm"
+            className="fixed inset-0 bg-[#1a1a1a]/40"
             onClick={() => setMobileOpen(false)}
             aria-hidden
           />
-          <aside className="relative z-10 flex w-72 flex-col bg-white border-r-2 border-[#1a1a1a]/10">
+          <aside className="relative z-10 flex w-72 flex-col bg-white border-r border-[#1a1a1a]/8">
             <SidebarContent
               admin={admin}
               pathname={pathname}
@@ -91,11 +91,11 @@ export function AdminShell({
       {/* Main */}
       <div className="flex-1 min-w-0 flex flex-col">
         {/* Mobile header */}
-        <header className="lg:hidden bg-white border-b-2 border-[#1a1a1a]/10 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
+        <header className="lg:hidden bg-white border-b border-[#1a1a1a]/8 px-4 py-3 flex items-center justify-between sticky top-0 z-40">
           <button
             onClick={() => setMobileOpen(true)}
             aria-label="Open menu"
-            className="p-2 rounded-full hover:bg-[#f7e7ce]"
+            className="p-2 hover:bg-[#1a1a1a]/5"
           >
             <Menu className="h-5 w-5" />
           </button>
@@ -105,13 +105,13 @@ export function AdminShell({
           <button
             onClick={handleSignOut}
             aria-label="Sign out"
-            className="p-2 rounded-full hover:bg-[#f7e7ce]"
+            className="p-2 hover:bg-[#1a1a1a]/5"
           >
             <LogOut className="h-5 w-5" />
           </button>
         </header>
 
-        <main className="flex-1 p-4 md:p-8">{children}</main>
+        <main className="flex-1 p-6 md:p-10 lg:p-12">{children}</main>
       </div>
     </div>
   )
@@ -130,56 +130,63 @@ function SidebarContent({
 }) {
   return (
     <>
-      <div className="px-6 py-6 border-b-2 border-[#1a1a1a]/10 flex items-center justify-between">
+      <div className="px-6 py-6 border-b border-[#1a1a1a]/8 flex items-center justify-between">
         <Link href="/admin" className="text-[#1a1a1a]" onClick={onLinkClick}>
           <Logo size="sm" />
         </Link>
         <button
           onClick={onLinkClick}
-          className="lg:hidden p-2 rounded-full hover:bg-[#f7e7ce]"
+          className="lg:hidden p-2 hover:bg-[#1a1a1a]/5"
           aria-label="Close"
         >
           <X className="h-5 w-5" />
         </button>
       </div>
 
-      <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
-        {NAV.map((item) => {
-          const Icon = item.icon
-          const active = item.exact
-            ? pathname === item.href
-            : pathname === item.href || pathname.startsWith(item.href + "/")
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              onClick={onLinkClick}
-              className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-medium transition-colors",
-                active
-                  ? "bg-[#1a1a1a] text-[#ffc107]"
-                  : "text-[#1a1a1a] hover:bg-[#f7e7ce]",
-              )}
-            >
-              <Icon className="h-4 w-4 shrink-0" />
-              {item.label}
-            </Link>
-          )
-        })}
+      <nav className="flex-1 overflow-y-auto py-6">
+        <p className="px-6 mb-3 text-[10px] tracking-[0.18em] uppercase text-[#1a1a1a]/40">
+          menu
+        </p>
+        <div className="flex flex-col">
+          {NAV.map((item) => {
+            const Icon = item.icon
+            const active = item.exact
+              ? pathname === item.href
+              : pathname === item.href || pathname.startsWith(item.href + "/")
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={onLinkClick}
+                className={cn(
+                  "group flex items-center gap-3 px-6 py-2.5 text-sm transition-colors border-l-2",
+                  active
+                    ? "border-[#1a1a1a] text-[#1a1a1a] bg-[#1a1a1a]/[0.03] font-medium"
+                    : "border-transparent text-[#1a1a1a]/70 hover:text-[#1a1a1a] hover:bg-[#1a1a1a]/[0.02]",
+                )}
+              >
+                <Icon className={cn("h-4 w-4 shrink-0", active ? "opacity-100" : "opacity-60")} />
+                {item.label}
+              </Link>
+            )
+          })}
+        </div>
       </nav>
 
-      <div className="border-t-2 border-[#1a1a1a]/10 p-4">
+      <div className="border-t border-[#1a1a1a]/8 p-6">
         {admin && (
-          <div className="mb-3 px-2">
-            <p className="text-xs text-[#502e23]/70 uppercase tracking-wider">{admin.role}</p>
-            <p className="text-sm font-medium text-[#1a1a1a] truncate">
+          <div className="mb-4">
+            <p className="text-[10px] tracking-[0.18em] uppercase text-[#1a1a1a]/40 mb-1">
+              {admin.role}
+            </p>
+            <p className="text-sm text-[#1a1a1a] truncate">
               {admin.display_name || admin.email}
             </p>
           </div>
         )}
         <button
           onClick={onSignOut}
-          className="w-full flex items-center gap-2 px-3 py-2 rounded-2xl text-sm font-medium text-[#502e23]/70 hover:bg-[#f7e7ce] hover:text-[#1a1a1a] transition-colors"
+          className="flex items-center gap-2 text-sm text-[#1a1a1a]/60 hover:text-[#1a1a1a] transition-colors"
         >
           <LogOut className="h-4 w-4" />
           αποσύνδεση

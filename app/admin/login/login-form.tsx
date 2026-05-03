@@ -35,28 +35,23 @@ function LoginFormInner() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#f7e7ce] p-6">
-      <div
-        className="w-full max-w-md bg-white border-2 border-[#1a1a1a] rounded-3xl p-8"
-        style={{ boxShadow: "0 12px 28px -16px rgba(26, 18, 8, 0.25)" }}
-      >
+    <div className="min-h-screen flex items-center justify-center bg-[#fafaf7] p-6">
+      <div className="w-full max-w-md bg-white border border-[#1a1a1a]/10 p-10">
         <Link
           href="/"
-          className="text-[#1a1a1a] inline-block mb-6"
+          className="text-[#1a1a1a] inline-block mb-10"
           aria-label="Kati Kandles"
         >
           <Logo size="md" />
         </Link>
 
-        <div className="caption text-[#ff6b35] mb-2">admin</div>
+        <p className="text-[11px] tracking-[0.2em] uppercase text-[#1a1a1a]/50 mb-3">admin</p>
 
         {status === "sent" ? (
           <>
-            <h1 className="headline-md text-[#1a1a1a] text-3xl mb-2">
-              <CheckCircle2 className="inline h-6 w-6 mr-2 -mt-1 text-[#0f9b81]" />
-              έλεγξε το email
-            </h1>
-            <p className="text-[#502e23]/85 leading-relaxed">
+            <h1 className="headline-md text-[#1a1a1a] text-3xl mb-3">έλεγξε το email</h1>
+            <p className="text-[#1a1a1a]/65 leading-relaxed text-sm">
+              <CheckCircle2 className="inline h-4 w-4 mr-1.5 -mt-0.5 text-[#0f9b81]" />
               Αν το email σου είναι εγκεκριμένο, σου στείλαμε σύνδεσμο εισόδου.
               Ισχύει για 24 ώρες — δεν χρειάζεσαι κωδικό.
             </p>
@@ -66,37 +61,36 @@ function LoginFormInner() {
                 setStatus("idle")
                 setEmail("")
               }}
-              className="mt-6 text-sm text-[#502e23]/70 hover:text-[#1a1a1a] underline"
+              className="mt-8 text-xs tracking-[0.12em] uppercase text-[#1a1a1a]/60 hover:text-[#1a1a1a] border-b border-[#1a1a1a]/20 hover:border-[#1a1a1a] pb-0.5 transition-colors"
             >
               στείλε σε άλλο email
             </button>
           </>
         ) : (
           <>
-            <h1 className="headline-md text-[#1a1a1a] text-3xl mb-1">
-              <Mail className="inline h-6 w-6 mr-2 -mt-1" />
-              σύνδεση
-            </h1>
-            <p className="text-[#502e23]/70 text-sm mb-7">
+            <h1 className="headline-md text-[#1a1a1a] text-3xl mb-2">σύνδεση</h1>
+            <p className="text-[#1a1a1a]/65 text-sm mb-8">
               Δώσε το email σου · θα σου στείλουμε σύνδεσμο εισόδου.
             </p>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-5">
               <label className="block">
-                <span className="caption text-[#502e23]/70 mb-1.5 block">email</span>
+                <span className="text-[11px] tracking-[0.2em] uppercase text-[#1a1a1a]/50 mb-2 block">
+                  email
+                </span>
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="kk-input"
+                  className="w-full px-0 py-2 bg-transparent border-0 border-b border-[#1a1a1a]/20 focus:border-[#1a1a1a] focus:outline-none text-[#1a1a1a] placeholder-[#1a1a1a]/30 transition-colors"
                   autoComplete="email"
                   placeholder="you@example.com"
                 />
               </label>
 
               {error && (
-                <p className="text-sm text-destructive bg-destructive/10 border border-destructive/30 rounded-2xl p-3 flex items-start gap-2">
+                <p className="text-sm text-destructive flex items-start gap-2">
                   <AlertCircle className="h-4 w-4 mt-0.5 shrink-0" />
                   <span>{error}</span>
                 </p>
@@ -105,7 +99,7 @@ function LoginFormInner() {
               <button
                 type="submit"
                 disabled={isPending || !email}
-                className="kk-btn kk-btn-primary w-full disabled:opacity-60"
+                className="w-full inline-flex items-center justify-center gap-2 bg-[#1a1a1a] text-white px-6 py-3 text-sm tracking-[0.04em] hover:bg-[#1a1a1a]/85 disabled:opacity-50 transition-colors"
               >
                 {isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -118,7 +112,7 @@ function LoginFormInner() {
               </button>
             </form>
 
-            <p className="mt-6 text-xs text-[#502e23]/60">
+            <p className="mt-8 text-xs text-[#1a1a1a]/50 leading-relaxed">
               Μόνο εγκεκριμένα emails λαμβάνουν σύνδεσμο. Αν δεν είσαι admin,
               δεν θα σταλεί τίποτα.
             </p>
@@ -131,7 +125,7 @@ function LoginFormInner() {
 
 export function LoginForm() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#f7e7ce]" />}>
+    <Suspense fallback={<div className="min-h-screen bg-[#fafaf7]" />}>
       <LoginFormInner />
     </Suspense>
   )

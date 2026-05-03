@@ -188,7 +188,9 @@ export function ProductForm({ initial, categories }: ProductFormProps) {
                     </button>
                   </div>
                   {i === 0 && (
-                    <span className="absolute top-1 left-1 kk-sticker bg-[#ffc107] text-[#1a1a1a] text-[9px] py-0.5 px-2">cover</span>
+                    <span className="absolute top-1.5 left-1.5 bg-[#1a1a1a] text-white text-[9px] tracking-[0.14em] uppercase py-0.5 px-1.5">
+                      cover
+                    </span>
                   )}
                 </div>
               ))}
