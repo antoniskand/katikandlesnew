@@ -14,3 +14,4 @@ node_modules/
 .claude/
 .cursor/
 *.log
+.env.production

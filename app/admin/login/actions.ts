@@ -11,6 +11,10 @@ export async function sendMagicLinkAction(formData: FormData) {
     await signIn("resend", {
       email,
       redirect: false,
+      // Where the magic link should land *after* successful verification.
+      // Without this, NextAuth defaults to the current page (login),
+      // which makes a successful sign-in look like a failure.
+      redirectTo: "/admin",
     })
     return { ok: true as const }
   } catch (e: any) {
