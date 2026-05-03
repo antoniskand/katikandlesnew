@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 160" fill="none">
+  <style>
+    .wm { font-family: 'Caveat', 'Comic Sans MS', cursive; font-weight: 700; font-size: 110px; letter-spacing: 0.02em; }
+  </style>
+  <text x="0" y="120" class="wm" fill="currentColor">kati kandles</text>
+  <!-- candle flame on top of the d in kandles -->
+  <g transform="translate(457 18)">
+    <path d="M8 0 C 14 8, 14 18, 8 26 C 2 18, 2 8, 8 0 Z" fill="currentColor"/>
+  </g>
+</svg>
