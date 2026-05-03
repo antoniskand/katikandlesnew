@@ -3,6 +3,7 @@ import { Suspense } from "react"
 import { ScrollToTop } from "@/components/scroll-to-top"
 import { Header } from "@/components/header"
 import { MinimalFooter } from "@/components/minimal-footer"
+import { CookieConsent } from "@/components/cookie-consent"
 import { CategoriesProvider } from "@/context/categories-context"
 
 function PageLoadingFallback() {
@@ -27,6 +28,7 @@ export default function MainLayout({
           <main className="relative flex-1 w-full">{children}</main>
           <MinimalFooter />
         </Suspense>
+        <CookieConsent />
       </div>
     </CategoriesProvider>
   )

@@ -125,6 +125,19 @@ export function MinimalFooter() {
                   Όροι Χρήσης
                 </Link>
               </li>
+              <li>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (typeof window !== "undefined") {
+                      window.dispatchEvent(new CustomEvent("kk-open-cookie-preferences"))
+                    }
+                  }}
+                  className="text-white/70 hover:text-white transition-colors text-left"
+                >
+                  Ρυθμίσεις cookies
+                </button>
+              </li>
             </ul>
           </div>
         </div>

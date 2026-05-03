@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { useCart } from "@/context/cart-context"
 import { useSafeToast } from "@/context/toast-context"
 import { Button } from "@/components/ui/button"
@@ -39,6 +40,7 @@ export function AddToCartButton({
   onSuccess,
 }: AddToCartButtonProps) {
   const { addItem } = useCart()
+  const router = useRouter()
   const [isAdding, setIsAdding] = useState(false)
   const [isAdded, setIsAdded] = useState(false)
   const { addToast } = useSafeToast()
@@ -76,8 +78,8 @@ export function AddToCartButton({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => (window.location.href = "/cart")}
-            className="ml-auto bg-white text-green-700 hover:bg-green-50 border-green-200"
+            onClick={() => router.push("/cart")}
+            className="ml-auto bg-transparent border-[#1a1a1a]/20 text-[#1a1a1a] hover:bg-[#1a1a1a]/5"
           >
             Προβολή Καλαθιού
           </Button>
