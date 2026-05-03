@@ -1,5 +1,4 @@
 // app/(main)/page.tsx
-import { EditorialHero } from "@/components/editorial-hero"
 import { AnniversaryDropSection } from "@/components/anniversary-drop-section"
 import { CreationOfMomSection } from "@/components/creation-of-mom-section"
 import { CategorySections } from "@/components/category-sections"
@@ -40,7 +39,6 @@ export default async function Home() {
 
   return (
     <div className="flex flex-col overflow-x-hidden">
-      <EditorialHero />
       <CreationOfMomSection />
       <AnniversaryDropSection drop={drop as any} products={dropProducts} />
       <CategorySections
