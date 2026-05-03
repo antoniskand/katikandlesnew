@@ -205,7 +205,7 @@ create table if not exists drops (
   background_color text default '#ff6b35',
   active boolean not null default true,
   featured boolean not null default false,
-  product_ids jsonb not null default '[]'::jsonb,
+  product_ids uuid[] not null default '{}'::uuid[],
   sort_order int not null default 0,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()

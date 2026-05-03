@@ -214,7 +214,7 @@ export const drops = pgTable(
     backgroundColor: text("background_color").default("#ff6b35"),
     active: boolean("active").notNull().default(true),
     featured: boolean("featured").notNull().default(false),
-    productIds: jsonb("product_ids").notNull().default(sql`'[]'::jsonb`),
+    productIds: uuid("product_ids").array().notNull().default(sql`'{}'::uuid[]`),
     sortOrder: integer("sort_order").notNull().default(0),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
