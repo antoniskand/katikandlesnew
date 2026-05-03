@@ -15,10 +15,11 @@ let cached: Db | null = null
 
 function getDbInstance(): Db {
   if (cached) return cached
-  const url = process.env.DATABASE_URL
+  // Accept either DATABASE_URL (manual) or NEON_DATABASE_URL (Vercel-Neon integration).
+  const url = process.env.DATABASE_URL || process.env.NEON_DATABASE_URL
   if (!url) {
     throw new Error(
-      "DATABASE_URL is not set. Configure it in Vercel → Settings → Environment Variables.",
+      "Neither DATABASE_URL nor NEON_DATABASE_URL is set. Configure one in Vercel → Settings → Environment Variables.",
     )
   }
   const client = neon(url)
