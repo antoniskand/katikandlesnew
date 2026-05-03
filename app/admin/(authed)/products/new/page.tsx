@@ -1,15 +1,13 @@
-import { getSupabaseServiceClient } from "@/lib/supabase-server"
+import { asc } from "drizzle-orm"
+import { db } from "@/lib/db"
+import { categories } from "@/lib/db/schema"
 import { AdminPageHeader } from "@/components/admin/page-header"
 import { ProductForm } from "@/components/admin/product-form"
 
 export const dynamic = "force-dynamic"
 
 export default async function NewProductPage() {
-  const supabase = getSupabaseServiceClient()
-  const { data: categories } = await supabase
-    .from("categories")
-    .select("id, name, slug")
-    .order("sort_order")
+  const cats = await db.select().from(categories).orderBy(asc(categories.sortOrder))
 
   return (
     <div>
@@ -18,7 +16,7 @@ export default async function NewProductPage() {
         title="Νέο προϊόν"
         back={{ href: "/admin/products", label: "πίσω στα προϊόντα" }}
       />
-      <ProductForm categories={categories || []} />
+      <ProductForm categories={cats} />
     </div>
   )
 }

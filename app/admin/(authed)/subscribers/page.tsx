@@ -1,15 +1,16 @@
-import { getSupabaseServiceClient } from "@/lib/supabase-server"
+import { desc } from "drizzle-orm"
+import { db } from "@/lib/db"
+import { newsletterSubscribers } from "@/lib/db/schema"
 import { AdminPageHeader } from "@/components/admin/page-header"
 import { Download } from "lucide-react"
 
 export const dynamic = "force-dynamic"
 
 export default async function SubscribersAdmin() {
-  const supabase = getSupabaseServiceClient()
-  const { data: subs } = await supabase
-    .from("newsletter_subscribers")
-    .select("*")
-    .order("subscribed_at", { ascending: false })
+  const subs = await db
+    .select()
+    .from(newsletterSubscribers)
+    .orderBy(desc(newsletterSubscribers.subscribedAt))
 
   return (
     <div>
@@ -40,8 +41,8 @@ export default async function SubscribersAdmin() {
               <th className="px-4 py-3">date</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-ink/5">
-            {(subs || []).map((s: any) => (
+          <tbody className="divide-y divide-[#1a1a1a]/5">
+            {subs.map((s) => (
               <tr key={s.id} className="hover:bg-[#f7e7ce]/50">
                 <td className="px-4 py-3 font-medium">{s.email}</td>
                 <td className="px-4 py-3">
@@ -57,13 +58,15 @@ export default async function SubscribersAdmin() {
                 </td>
                 <td className="px-4 py-3 text-[#502e23]/70">{s.source || "—"}</td>
                 <td className="px-4 py-3 text-[#502e23]/70">
-                  {new Date(s.subscribed_at).toLocaleDateString("el-GR")}
+                  {s.subscribedAt instanceof Date
+                    ? s.subscribedAt.toLocaleDateString("el-GR")
+                    : ""}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-        {(!subs || subs.length === 0) && (
+        {subs.length === 0 && (
           <p className="text-center text-[#502e23]/70 py-12">Καμία εγγραφή.</p>
         )}
       </div>

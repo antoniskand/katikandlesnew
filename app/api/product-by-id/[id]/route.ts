@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getProductById } from "@/lib/supabase-api"
+import { getProductById } from "@/lib/db-queries"
 
 interface Ctx {
   params: Promise<{ id: string }>

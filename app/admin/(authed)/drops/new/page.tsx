@@ -1,16 +1,17 @@
-import { getSupabaseServiceClient } from "@/lib/supabase-server"
+import { desc, eq } from "drizzle-orm"
+import { db } from "@/lib/db"
+import { products } from "@/lib/db/schema"
 import { AdminPageHeader } from "@/components/admin/page-header"
 import { DropForm } from "@/components/admin/drop-form"
 
 export const dynamic = "force-dynamic"
 
 export default async function NewDropPage() {
-  const supabase = getSupabaseServiceClient()
-  const { data: products } = await supabase
-    .from("products")
-    .select("id, name, images")
-    .eq("active", true)
-    .order("created_at", { ascending: false })
+  const rows = await db
+    .select({ id: products.id, name: products.name, images: products.images })
+    .from(products)
+    .where(eq(products.active, true))
+    .orderBy(desc(products.createdAt))
 
   return (
     <div>
@@ -19,7 +20,7 @@ export default async function NewDropPage() {
         title="Νέο drop"
         back={{ href: "/admin/drops", label: "πίσω στα drops" }}
       />
-      <DropForm products={(products as any) || []} />
+      <DropForm products={rows as any} />
     </div>
   )
 }

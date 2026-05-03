@@ -1,38 +1,31 @@
-// app/api/admin/coupons/route.ts
 import { type NextRequest, NextResponse } from "next/server"
-import { getServerClient } from "@/lib/supabase-api"
+import { desc } from "drizzle-orm"
+import { db } from "@/lib/db"
+import { coupons } from "@/lib/db/schema"
 
 export async function GET() {
-  const supabase = getServerClient()
-  const { data, error } = await supabase.from("coupons").select("*").order("created_at", { ascending: false })
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json(data || [])
+  const rows = await db.select().from(coupons).orderBy(desc(coupons.createdAt))
+  return NextResponse.json(rows)
 }
 
 export async function POST(request: NextRequest) {
-  const supabase = getServerClient()
   const body = await request.json()
-  body.code = body.code?.toUpperCase().trim()
-
-  const { data, error } = await supabase.from("coupons").insert(body).select().single()
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ success: true, coupon: data })
-}
-
-export async function PUT(request: NextRequest) {
-  const supabase = getServerClient()
-  const body = await request.json()
-  const { id, ...updateData } = body
-
-  const { data, error } = await supabase.from("coupons").update(updateData).eq("id", id).select().single()
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ success: true, coupon: data })
-}
-
-export async function DELETE(request: NextRequest) {
-  const supabase = getServerClient()
-  const { id } = await request.json()
-  const { error } = await supabase.from("coupons").delete().eq("id", id)
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ success: true })
+  const [coupon] = await db
+    .insert(coupons)
+    .values({
+      code: String(body.code).toUpperCase().trim(),
+      name: body.name,
+      description: body.description,
+      discountType: body.discount_type,
+      discountAmount: body.discount_amount != null ? String(body.discount_amount) : null,
+      discountPercent: body.discount_percent != null ? String(body.discount_percent) : null,
+      minOrderAmount: body.min_order_amount != null ? String(body.min_order_amount) : null,
+      maxUses: body.max_uses,
+      timesUsed: body.times_used ?? 0,
+      active: body.active !== false,
+      startsAt: body.starts_at ? new Date(body.starts_at) : null,
+      expiresAt: body.expires_at ? new Date(body.expires_at) : null,
+    })
+    .returning()
+  return NextResponse.json({ success: true, coupon })
 }

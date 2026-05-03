@@ -1,5 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getSupabaseServiceClient } from "@/lib/supabase-server"
+import { eq } from "drizzle-orm"
+import { db } from "@/lib/db"
+import { productCategories, productVariants, products } from "@/lib/db/schema"
 
 interface Ctx {
   params: Promise<{ id: string }>
@@ -7,67 +9,84 @@ interface Ctx {
 
 export async function GET(_req: NextRequest, { params }: Ctx) {
   const { id } = await params
-  const supabase = getSupabaseServiceClient()
-
-  const { data, error } = await supabase
-    .from("products")
-    .select("*, product_categories(category_id, categories(id, name, slug)), product_variants(*)")
-    .eq("id", id)
-    .single()
-
-  if (error || !data) {
+  const product = await db.query.products.findFirst({ where: eq(products.id, id) })
+  if (!product) {
     return NextResponse.json({ error: "Product not found" }, { status: 404 })
   }
-
-  return NextResponse.json(data)
+  const [cats, vars] = await Promise.all([
+    db.select().from(productCategories).where(eq(productCategories.productId, id)),
+    db.select().from(productVariants).where(eq(productVariants.productId, id)),
+  ])
+  return NextResponse.json({ ...product, categories: cats, variants: vars })
 }
 
 export async function PUT(request: NextRequest, { params }: Ctx) {
   const { id } = await params
-  const supabase = getSupabaseServiceClient()
-
   try {
     const body = await request.json()
-    const { categories: categoryIds, variants, ...productData } = body
+    const {
+      categories: categoryIds,
+      variants,
+      price,
+      sale_price,
+      stock_level,
+      sort_order,
+      ...rest
+    } = body as any
 
-    const { data: product, error } = await supabase
-      .from("products")
-      .update(productData)
-      .eq("id", id)
-      .select()
-      .single()
+    const update: Record<string, unknown> = { updatedAt: new Date() }
+    if (rest.name !== undefined) update.name = rest.name
+    if (rest.slug !== undefined) update.slug = rest.slug
+    if (rest.description !== undefined) update.description = rest.description
+    if (price !== undefined) update.price = String(price)
+    if (sale_price !== undefined) update.salePrice = sale_price == null ? null : String(sale_price)
+    if (rest.currency !== undefined) update.currency = rest.currency
+    if (rest.images !== undefined) update.images = rest.images
+    if (rest.stock_status !== undefined) update.stockStatus = rest.stock_status
+    if (stock_level !== undefined) update.stockLevel = stock_level
+    if (rest.stock_tracking !== undefined) update.stockTracking = !!rest.stock_tracking
+    if (rest.active !== undefined) update.active = rest.active
+    if (rest.attributes !== undefined) update.attributes = rest.attributes
+    if (sort_order !== undefined) update.sortOrder = sort_order
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
-    }
+    const [product] = await db
+      .update(products)
+      .set(update)
+      .where(eq(products.id, id))
+      .returning()
+
+    if (!product) return NextResponse.json({ error: "Not found" }, { status: 404 })
 
     if (categoryIds !== undefined) {
-      await supabase.from("product_categories").delete().eq("product_id", id)
+      await db.delete(productCategories).where(eq(productCategories.productId, id))
       if (categoryIds.length > 0) {
-        const links = categoryIds.map((catId: string) => ({
-          product_id: id,
-          category_id: catId,
-        }))
-        await supabase.from("product_categories").insert(links)
+        await db.insert(productCategories).values(
+          categoryIds.map((catId: string) => ({ productId: id, categoryId: catId })),
+        )
       }
     }
 
     if (variants !== undefined) {
-      await supabase.from("product_variants").delete().eq("product_id", id)
+      await db.delete(productVariants).where(eq(productVariants.productId, id))
       if (variants.length > 0) {
-        const variantData = variants.map((v: any) => ({
-          ...v,
-          product_id: id,
-          id: undefined,
-        }))
-        await supabase.from("product_variants").insert(variantData)
+        await db.insert(productVariants).values(
+          variants.map((v: any) => ({
+            productId: id,
+            name: v.name,
+            price: v.price != null ? String(v.price) : null,
+            stockLevel: v.stock_level ?? 0,
+            optionValues: v.option_values || {},
+            active: v.active !== false,
+            sortOrder: v.sort_order ?? 0,
+          })),
+        )
       }
     }
 
     return NextResponse.json({ success: true, product })
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to update product" },
+      { error: error instanceof Error ? error.message : "Failed" },
       { status: 500 },
     )
   }
@@ -75,10 +94,6 @@ export async function PUT(request: NextRequest, { params }: Ctx) {
 
 export async function DELETE(_req: NextRequest, { params }: Ctx) {
   const { id } = await params
-  const supabase = getSupabaseServiceClient()
-  const { error } = await supabase.from("products").delete().eq("id", id)
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
-  }
+  await db.delete(products).where(eq(products.id, id))
   return NextResponse.json({ success: true })
 }

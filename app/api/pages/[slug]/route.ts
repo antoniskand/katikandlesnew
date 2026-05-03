@@ -1,6 +1,6 @@
 // app/api/pages/[slug]/route.ts
 import { NextResponse } from "next/server"
-import { getPage } from "@/lib/supabase-api"
+import { getPage } from "@/lib/db-queries"
 
 export const dynamic = "force-dynamic"
 

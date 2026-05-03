@@ -1,48 +1,39 @@
-// app/api/admin/orders/route.ts
 import { type NextRequest, NextResponse } from "next/server"
-import { getServerClient } from "@/lib/supabase-api"
+import { desc, eq, inArray, sql } from "drizzle-orm"
+import { db } from "@/lib/db"
+import { orderItems, orders } from "@/lib/db/schema"
 
 export async function GET(request: NextRequest) {
-  const supabase = getServerClient()
   const { searchParams } = new URL(request.url)
-
   const page = parseInt(searchParams.get("page") || "1")
   const limit = parseInt(searchParams.get("limit") || "50")
   const status = searchParams.get("status")
   const offset = (page - 1) * limit
 
-  let query = supabase
-    .from("orders")
-    .select("*", { count: "exact" })
+  const where = status ? eq(orders.status, status) : undefined
 
-  if (status) query = query.eq("status", status)
+  const rows = await db
+    .select()
+    .from(orders)
+    .where(where)
+    .orderBy(desc(orders.createdAt))
+    .limit(limit)
+    .offset(offset)
 
-  query = query.order("created_at", { ascending: false }).range(offset, offset + limit - 1)
+  const [{ count }] = await db
+    .select({ count: sql<number>`count(*)::int` })
+    .from(orders)
+    .where(where)
 
-  const { data, error, count } = await query
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  const ids = rows.map((o) => o.id)
+  const items = ids.length
+    ? await db.select().from(orderItems).where(inArray(orderItems.orderId, ids))
+    : []
 
-  // Fetch items for each order
-  const orderIds = (data || []).map((o: any) => o.id)
-  const { data: allItems } = await supabase
-    .from("order_items")
-    .select("*")
-    .in("order_id", orderIds)
-
-  const ordersWithItems = (data || []).map((order: any) => ({
-    ...order,
-    items: (allItems || []).filter((item: any) => item.order_id === order.id),
+  const ordersWithItems = rows.map((o) => ({
+    ...o,
+    items: items.filter((i) => i.orderId === o.id),
   }))
 
-  return NextResponse.json({ results: ordersWithItems, count: count || 0 })
-}
-
-export async function PUT(request: NextRequest) {
-  const supabase = getServerClient()
-  const body = await request.json()
-  const { id, ...updateData } = body
-
-  const { data, error } = await supabase.from("orders").update(updateData).eq("id", id).select().single()
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ success: true, order: data })
+  return NextResponse.json({ results: ordersWithItems, count: Number(count) || 0 })
 }

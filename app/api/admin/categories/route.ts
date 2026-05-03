@@ -1,45 +1,32 @@
-// app/api/admin/categories/route.ts
 import { type NextRequest, NextResponse } from "next/server"
-import { getServerClient } from "@/lib/supabase-api"
+import { asc } from "drizzle-orm"
+import { db } from "@/lib/db"
+import { categories } from "@/lib/db/schema"
+
+function slugify(s: string) {
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9Ͱ-Ͽ]+/g, "-")
+    .replace(/^-|-$/g, "")
+}
 
 export async function GET() {
-  const supabase = getServerClient()
-  const { data, error } = await supabase.from("categories").select("*").order("sort_order")
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json(data || [])
+  const rows = await db.select().from(categories).orderBy(asc(categories.sortOrder))
+  return NextResponse.json(rows)
 }
 
 export async function POST(request: NextRequest) {
-  const supabase = getServerClient()
   const body = await request.json()
-
-  if (!body.slug) {
-    body.slug = body.name
-      .toLowerCase()
-      .replace(/[^a-z0-9\u0370-\u03FF]+/g, "-")
-      .replace(/^-|-$/g, "")
-  }
-
-  const { data, error } = await supabase.from("categories").insert(body).select().single()
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ success: true, category: data })
-}
-
-export async function PUT(request: NextRequest) {
-  const supabase = getServerClient()
-  const body = await request.json()
-  const { id, ...updateData } = body
-
-  const { data, error } = await supabase.from("categories").update(updateData).eq("id", id).select().single()
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ success: true, category: data })
-}
-
-export async function DELETE(request: NextRequest) {
-  const supabase = getServerClient()
-  const { id } = await request.json()
-
-  const { error } = await supabase.from("categories").delete().eq("id", id)
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ success: true })
+  const slug = body.slug || slugify(body.name)
+  const [category] = await db
+    .insert(categories)
+    .values({
+      name: body.name,
+      slug,
+      description: body.description,
+      imageUrl: body.image_url,
+      sortOrder: body.sort_order ?? 0,
+    })
+    .returning()
+  return NextResponse.json({ success: true, category })
 }

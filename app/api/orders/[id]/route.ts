@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server"
-import { getOrder } from "@/lib/supabase-api"
+import { getOrder } from "@/lib/db-queries"
 
 export const dynamic = "force-dynamic"
 

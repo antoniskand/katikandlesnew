@@ -1,42 +1,35 @@
 import Link from "next/link"
-import {
-  ArrowRight,
-  Package,
-  Receipt,
-  Sparkles,
-  Users,
-  Euro,
-} from "lucide-react"
-import { getSupabaseServiceClient } from "@/lib/supabase-server"
+import { ArrowRight, Package, Receipt, Sparkles, Users, Euro } from "lucide-react"
+import { desc, sql } from "drizzle-orm"
+import { db } from "@/lib/db"
+import { drops, newsletterSubscribers, orders, products } from "@/lib/db/schema"
 import { formatPrice } from "@/lib/utils"
 
 export const dynamic = "force-dynamic"
 
 async function getStats() {
-  const supabase = getSupabaseServiceClient()
-
-  const [products, orders, drops, subscribers, recentOrders] = await Promise.all([
-    supabase.from("products").select("id", { count: "exact", head: true }),
-    supabase.from("orders").select("grand_total, status", { count: "exact" }),
-    supabase.from("drops").select("id", { count: "exact", head: true }),
-    supabase.from("newsletter_subscribers").select("id", { count: "exact", head: true }),
-    supabase
-      .from("orders")
-      .select("id, order_number, customer_first_name, customer_last_name, grand_total, status, created_at")
-      .order("created_at", { ascending: false })
-      .limit(5),
+  const [productsCount, ordersAll, dropsCount, subsCount, recent] = await Promise.all([
+    db.select({ count: sql<number>`count(*)::int` }).from(products),
+    db
+      .select({ status: orders.status, grandTotal: orders.grandTotal })
+      .from(orders),
+    db.select({ count: sql<number>`count(*)::int` }).from(drops),
+    db.select({ count: sql<number>`count(*)::int` }).from(newsletterSubscribers),
+    db.select().from(orders).orderBy(desc(orders.createdAt)).limit(5),
   ])
 
-  const paidOrders = (orders.data || []).filter((o) => o.status === "paid" || o.status === "shipped" || o.status === "delivered")
-  const revenue = paidOrders.reduce((sum, o) => sum + Number(o.grand_total || 0), 0)
+  const paidOrders = ordersAll.filter(
+    (o) => o.status === "paid" || o.status === "shipped" || o.status === "delivered",
+  )
+  const revenue = paidOrders.reduce((sum, o) => sum + Number(o.grandTotal || 0), 0)
 
   return {
-    productCount: products.count || 0,
-    orderCount: orders.count || 0,
-    dropCount: drops.count || 0,
-    subscriberCount: subscribers.count || 0,
+    productCount: Number(productsCount[0]?.count) || 0,
+    orderCount: ordersAll.length,
+    dropCount: Number(dropsCount[0]?.count) || 0,
+    subscriberCount: Number(subsCount[0]?.count) || 0,
     revenue,
-    recentOrders: recentOrders.data || [],
+    recentOrders: recent,
   }
 }
 
@@ -87,7 +80,7 @@ export default async function AdminDashboard() {
           <p className="text-[#502e23]/70 text-sm">Καμία παραγγελία ακόμη.</p>
         ) : (
           <div className="space-y-2">
-            {stats.recentOrders.map((order: any) => (
+            {stats.recentOrders.map((order) => (
               <Link
                 key={order.id}
                 href={`/admin/orders/${order.id}`}
@@ -95,15 +88,17 @@ export default async function AdminDashboard() {
               >
                 <div className="min-w-0">
                   <p className="font-medium text-[#1a1a1a] truncate">
-                    {order.order_number} · {order.customer_first_name} {order.customer_last_name}
+                    {order.orderNumber} · {order.customerFirstName} {order.customerLastName}
                   </p>
                   <p className="text-xs text-[#502e23]/70">
-                    {new Date(order.created_at).toLocaleString("el-GR")}
+                    {order.createdAt instanceof Date
+                      ? order.createdAt.toLocaleString("el-GR")
+                      : String(order.createdAt)}
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
                   <StatusBadge status={order.status} />
-                  <span className="font-bold text-[#1a1a1a]">{formatPrice(order.grand_total)}</span>
+                  <span className="font-bold text-[#1a1a1a]">{formatPrice(Number(order.grandTotal))}</span>
                 </div>
               </Link>
             ))}
@@ -146,7 +141,7 @@ export function StatusBadge({ status }: { status: string }) {
     shipped: { label: "στάλθηκε", cls: "bg-[#6a1b9a] text-white" },
     delivered: { label: "παραδόθηκε", cls: "bg-[#1a1a1a] text-[#ffc107]" },
     cancelled: { label: "ακυρώθηκε", cls: "bg-destructive text-white" },
-    refunded: { label: "επιστρ.", cls: "bg-[#1a1a1a]-soft text-white" },
+    refunded: { label: "επιστρ.", cls: "bg-[#502e23] text-white" },
   }
   const config = map[status] || { label: status, cls: "bg-[#1a1a1a]/10 text-[#1a1a1a]" }
   return (

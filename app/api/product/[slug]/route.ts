@@ -1,6 +1,6 @@
 // app/api/product/[slug]/route.ts
 import { type NextRequest, NextResponse } from "next/server"
-import { getProduct } from "@/lib/supabase-api"
+import { getProduct } from "@/lib/db-queries"
 
 interface Ctx { params: Promise<{ slug: string }> }
 

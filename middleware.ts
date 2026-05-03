@@ -1,54 +1,42 @@
-import { type NextRequest, NextResponse } from "next/server"
-import { createServerClient } from "@supabase/ssr"
+// middleware.ts
+// Guards /admin and /api/admin routes.
+// Stack Auth tokens live in cookies (set by tokenStore: "nextjs-cookie")
+// and are decoded server-side. We let the route layouts/handlers do the
+// actual user lookup; the middleware just blocks unauthenticated requests
+// from reaching protected pages.
 
-export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl
+import { NextResponse, type NextRequest } from "next/server"
 
-  // Only guard /admin and /api/admin (excluding /admin/login)
-  const isAdminArea =
-    (pathname.startsWith("/admin") && !pathname.startsWith("/admin/login")) ||
-    (pathname.startsWith("/api/admin") && pathname !== "/api/admin/auth")
+const STACK_COOKIE_PREFIX = "stack-"
 
-  if (!isAdminArea) return NextResponse.next()
-
-  let response = NextResponse.next({ request })
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll()
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value),
-          )
-          response = NextResponse.next({ request })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options),
-          )
-        },
-      },
-    },
-  )
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    if (pathname.startsWith("/api/")) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+function hasStackToken(req: NextRequest): boolean {
+  // Stack stores its session as cookies prefixed with "stack-".
+  for (const cookie of req.cookies.getAll()) {
+    if (cookie.name.startsWith(STACK_COOKIE_PREFIX) && cookie.value) {
+      return true
     }
-    const url = request.nextUrl.clone()
-    url.pathname = "/admin/login"
-    url.searchParams.set("next", pathname)
-    return NextResponse.redirect(url)
+  }
+  return false
+}
+
+export function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl
+
+  const isAdminPage = pathname.startsWith("/admin") && !pathname.startsWith("/admin/login")
+  const isAdminApi = pathname.startsWith("/api/admin")
+
+  if (!isAdminPage && !isAdminApi) return NextResponse.next()
+
+  if (hasStackToken(req)) return NextResponse.next()
+
+  if (isAdminApi) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
   }
 
-  return response
+  const url = req.nextUrl.clone()
+  url.pathname = "/admin/login"
+  url.searchParams.set("next", pathname)
+  return NextResponse.redirect(url)
 }
 
 export const config = {

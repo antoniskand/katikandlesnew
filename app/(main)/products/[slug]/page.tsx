@@ -1,7 +1,7 @@
 // app/(main)/products/[slug]/page.tsx
 import { notFound } from "next/navigation"
 import { unstable_cache } from "next/cache"
-import { getProduct } from "@/lib/supabase-api"
+import { getProduct } from "@/lib/db-queries"
 import { EditorialProductView } from "@/components/product/editorial-product-view"
 import { ProductJsonLd, BreadcrumbJsonLd } from "@/components/seo/json-ld"
 

@@ -1,5 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getSupabaseServiceClient } from "@/lib/supabase-server"
+import { eq } from "drizzle-orm"
+import { db } from "@/lib/db"
+import { categories } from "@/lib/db/schema"
 
 interface Ctx {
   params: Promise<{ id: string }>
@@ -7,23 +9,25 @@ interface Ctx {
 
 export async function PUT(request: NextRequest, { params }: Ctx) {
   const { id } = await params
-  const supabase = getSupabaseServiceClient()
   const body = await request.json()
-  delete body.id
-  const { data, error } = await supabase
-    .from("categories")
-    .update(body)
-    .eq("id", id)
-    .select()
-    .single()
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ success: true, category: data })
+
+  const update: Record<string, unknown> = { updatedAt: new Date() }
+  if (body.name !== undefined) update.name = body.name
+  if (body.slug !== undefined) update.slug = body.slug
+  if (body.description !== undefined) update.description = body.description
+  if (body.image_url !== undefined) update.imageUrl = body.image_url
+  if (body.sort_order !== undefined) update.sortOrder = body.sort_order
+
+  const [category] = await db
+    .update(categories)
+    .set(update)
+    .where(eq(categories.id, id))
+    .returning()
+  return NextResponse.json({ success: true, category })
 }
 
 export async function DELETE(_req: NextRequest, { params }: Ctx) {
   const { id } = await params
-  const supabase = getSupabaseServiceClient()
-  const { error } = await supabase.from("categories").delete().eq("id", id)
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  await db.delete(categories).where(eq(categories.id, id))
   return NextResponse.json({ success: true })
 }

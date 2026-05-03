@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
-import { getPage } from "@/lib/supabase-api"
+import { getPage } from "@/lib/db-queries"
 
 export const dynamic = "force-dynamic"
 

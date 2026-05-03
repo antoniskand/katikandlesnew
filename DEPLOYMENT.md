@@ -1,90 +1,108 @@
-# Deployment Guide — Kati Kandles v2
+# Deployment Guide — Kati Kandles
 
-## Πριν το deploy
+Stack: **Next.js 15 + Drizzle + Neon Postgres + Stack Auth (Neon Auth) + Stripe + Vercel Blob**.
 
-### 1. Install packages
+---
+
+## 1) Install packages
+
 ```bash
 pnpm install
 ```
 
-### 2. Supabase migrations
-Στο Supabase SQL Editor, τρέξε με τη σειρά:
+## 2) Set up Neon
 
-1. **`scripts/migrations/001_drops_admin_stripe.sql`** — δημιουργεί `drops`, `admin_users`, `site_settings`, `newsletter_subscribers` tables και προσθέτει `stripe_session_id` + `stripe_payment_intent_id` columns στο `orders`.
-2. (Αργότερα, μετά Stripe go-live) **`scripts/migrations/002_drop_viva.sql`** — αφαιρεί τα παλιά viva columns.
+1. Δημιούργησε project στο [console.neon.tech](https://console.neon.tech).
+2. Πήγαινε στο **Auth** tab και ενεργοποίησε το **Neon Auth** (powered by Stack).
+3. Στο **Connection** tab, αντίγραψε το `DATABASE_URL` (postgresql://…).
 
-### 3. Δημιούργησε admin user
+Πρόσθεσε στο `.env.local`:
 
-a. Στο Supabase Dashboard → Authentication → Users → Add user → email + password (αυτά θα βάλεις στο /admin/login)
+```
+DATABASE_URL=postgresql://USER:PASSWORD@HOST/neondb?sslmode=require
 
-b. Στο SQL Editor:
-```sql
-insert into admin_users (id, email, role)
-values (
-  (select id from auth.users where email = 'YOUR_EMAIL@example.com'),
-  'YOUR_EMAIL@example.com',
-  'owner'
-);
+NEXT_PUBLIC_STACK_PROJECT_ID=...
+NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY=...
+STACK_SECRET_SERVER_KEY=...
 ```
 
-### 4. Env vars (Vercel + .env.local)
+## 3) Apply the schema
+
+Δύο τρόποι — διάλεξε:
+
+**Drizzle Kit (πιο γρήγορο για dev):**
+```bash
+pnpm db:push
+```
+
+**Plain SQL (πρώτη εγκατάσταση):**
+Στο Neon SQL Editor, paste & run `scripts/migrations/001_initial.sql`.
+
+## 4) Δημιούργησε τον admin σου
+
+a. Στο Neon Auth (μέσω Stack dashboard) → Users → Create user (email + password).
+b. Σημείωσε το user `id`.
+c. Στο Neon SQL Editor:
+
+```sql
+insert into admin_users (id, email, display_name, role)
+values (
+  'STACK_USER_ID',
+  'you@example.com',
+  'Antonis',
+  'owner'
+)
+on conflict (id) do update set role = 'owner';
+```
+
+## 5) Stripe
+
+1. [dashboard.stripe.com](https://dashboard.stripe.com) → Developers → API keys → πάρε `sk_…` και `pk_…`.
+2. Developers → Webhooks → Add endpoint:
+   - URL: `https://YOUR-DOMAIN/api/payments/stripe/webhook`
+   - Events: `checkout.session.completed`, `checkout.session.expired`, `checkout.session.async_payment_failed`, `charge.refunded`
+3. Σημείωσε το `whsec_…`.
+
+## 6) Vercel env vars
 
 ```
 NEXT_PUBLIC_SITE_URL=https://katikandles.gr
-NEXT_PUBLIC_SUPABASE_URL=https://xxx.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJ...
-SUPABASE_SERVICE_ROLE_KEY=eyJ...
+
+DATABASE_URL=postgresql://...
+NEXT_PUBLIC_STACK_PROJECT_ID=...
+NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY=...
+STACK_SECRET_SERVER_KEY=...
 
 STRIPE_SECRET_KEY=sk_live_...
 STRIPE_WEBHOOK_SECRET=whsec_...
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_...
 
-BLOB_READ_WRITE_TOKEN=vercel_blob_rw_...
+BLOB_READ_WRITE_TOKEN=...
 ```
 
-### 5. Stripe Webhook
-Στο Stripe Dashboard → Developers → Webhooks → Add endpoint:
-- URL: `https://katikandles.gr/api/payments/stripe/webhook`
-- Events: `checkout.session.completed`, `checkout.session.expired`, `checkout.session.async_payment_failed`, `charge.refunded`
-- Αντιγραψε το signing secret στο `STRIPE_WEBHOOK_SECRET`.
+## 7) Deploy
 
-## Πώς δουλεύει το νέο σύστημα
+Push στο `main` — Vercel κάνει auto-deploy. Στο πρώτο deploy:
 
-### CMS — `/admin`
-- Login με Supabase Auth (email/password)
-- Sidebar tabs: Dashboard, Προϊόντα, Drops, Παραγγελίες, Σελίδες, Κατηγορίες, Κουπόνια, Newsletter, Ρυθμίσεις
-- Σελίδες με rich text editor (Tiptap)
-- Drops με scheduled start/end, featured flag, multi-product picker
-- Image uploads via Vercel Blob
+1. Verify ότι το build περνά (build logs).
+2. Visit `/admin/login` → sign in.
+3. Verify ότι βλέπεις τα stats (αν δεν έχεις data, θα είναι 0/€0).
 
-### Drops στο homepage
-- Στο admin → Drops → toggle "featured" + "active"
-- Αν υπάρχει featured drop, εμφανίζεται στο `<AnniversaryDropSection>` της αρχικής
-- Διαφορετικά, η section δεν renderάρει (returns null)
+---
 
-### Stripe checkout flow
-1. Χρήστης συμπληρώνει checkout form
-2. POST `/api/payments/stripe/checkout` → δημιουργεί order σε Supabase με status `payment_pending`
-3. Δημιουργεί Stripe Checkout Session με metadata το order_id
-4. Redirect στο Stripe-hosted page
-5. Μετά την πληρωμή → Stripe webhook hits `/api/payments/stripe/webhook` → ενημερώνει order σε `paid`, αφαιρεί stock, αυξάνει χρήσεις κουπονιού
-6. Stripe redirect στο `/checkout/success?session_id=...`
+## Local development
 
-### v0 + Vercel sync
-Pushάρεις τοπικά → GitHub → Vercel auto-deploys. v0.dev sync μέσα.
+```bash
+pnpm dev
+```
 
-## Τι δεν κάνει (yet)
-- **Email notifications** για παραγγελίες — προσθήκη με Resend/Postmark αργότερα
-- **Variants** στο product form — υπάρχει το schema, η UI δεν εκθέτει variant editing
-- **Analytics dashboard** — μόνο revenue + count στο admin homepage
+Drizzle Studio (visual DB browser):
+```bash
+pnpm db:studio
+```
 
-## Troubleshooting
+## Schema changes flow
 
-### "stripe_payment_intent_id column does not exist"
-Δεν τρέξατε το `001_drops_admin_stripe.sql` migration.
-
-### Admin login redirects σε loop
-Δεν υπάρχει εγγραφή στο `admin_users` table. Δες "3. Δημιούργησε admin user".
-
-### `pnpm install` fails on @tailwindcss/typography
-Tailwind v4 — η σύνταξη είναι `@plugin "@tailwindcss/typography"` μέσα στο CSS (έχει ήδη μπει στο `styles/globals.css`).
+1. Άλλαξε `lib/db/schema.ts`.
+2. `pnpm db:generate` → φτιάχνει SQL migration στο `drizzle/`.
+3. `pnpm db:push` (dev) ή commit + apply στο Neon (prod).

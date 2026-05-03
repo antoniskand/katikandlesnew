@@ -1,5 +1,7 @@
 import Link from "next/link"
-import { getSupabaseServiceClient } from "@/lib/supabase-server"
+import { and, desc, eq, ilike, or, type SQL } from "drizzle-orm"
+import { db } from "@/lib/db"
+import { orders } from "@/lib/db/schema"
 import { AdminPageHeader } from "@/components/admin/page-header"
 import { StatusBadge } from "@/app/admin/(authed)/page"
 import { formatPrice } from "@/lib/utils"
@@ -12,18 +14,26 @@ interface Props {
 
 export default async function OrdersAdmin({ searchParams }: Props) {
   const { status, q } = await searchParams
-  const supabase = getSupabaseServiceClient()
 
-  let query = supabase
-    .from("orders")
-    .select("id, order_number, customer_first_name, customer_last_name, customer_email, grand_total, status, payment_status, created_at")
-    .order("created_at", { ascending: false })
+  const filters: SQL[] = []
+  if (status) filters.push(eq(orders.status, status))
+  if (q) {
+    const search = `%${q}%`
+    const searchCondition = or(
+      ilike(orders.orderNumber, search),
+      ilike(orders.customerEmail, search),
+      ilike(orders.customerLastName, search),
+    )
+    if (searchCondition) filters.push(searchCondition)
+  }
+  const where = filters.length > 0 ? and(...filters) : undefined
+
+  const rows = await db
+    .select()
+    .from(orders)
+    .where(where)
+    .orderBy(desc(orders.createdAt))
     .limit(100)
-
-  if (status) query = query.eq("status", status)
-  if (q) query = query.or(`order_number.ilike.%${q}%,customer_email.ilike.%${q}%,customer_last_name.ilike.%${q}%`)
-
-  const { data: orders } = await query
 
   const statuses = [
     { id: undefined, label: "όλες" },
@@ -76,32 +86,40 @@ export default async function OrdersAdmin({ searchParams }: Props) {
               <th className="px-4 py-3">date</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-ink/5">
-            {(orders || []).map((o: any) => (
-              <tr
-                key={o.id}
-                className="hover:bg-[#f7e7ce]/50 cursor-pointer"
-                onClick={() => {}}
-              >
+          <tbody className="divide-y divide-[#1a1a1a]/5">
+            {rows.map((o) => (
+              <tr key={o.id} className="hover:bg-[#f7e7ce]/50 cursor-pointer">
                 <td className="px-4 py-3">
-                  <Link href={`/admin/orders/${o.id}`} className="font-bold text-[#ff6b35] hover:underline">
-                    {o.order_number}
+                  <Link
+                    href={`/admin/orders/${o.id}`}
+                    className="font-bold text-[#ff6b35] hover:underline"
+                  >
+                    {o.orderNumber}
                   </Link>
                 </td>
                 <td className="px-4 py-3">
-                  <p className="font-medium">{o.customer_first_name} {o.customer_last_name}</p>
-                  <p className="text-xs text-[#502e23]/70">{o.customer_email}</p>
+                  <p className="font-medium">
+                    {o.customerFirstName} {o.customerLastName}
+                  </p>
+                  <p className="text-xs text-[#502e23]/70">{o.customerEmail}</p>
                 </td>
-                <td className="px-4 py-3 font-bold">{formatPrice(o.grand_total)}</td>
-                <td className="px-4 py-3"><StatusBadge status={o.status} /></td>
+                <td className="px-4 py-3 font-bold">{formatPrice(Number(o.grandTotal))}</td>
+                <td className="px-4 py-3">
+                  <StatusBadge status={o.status} />
+                </td>
                 <td className="px-4 py-3 text-[#502e23]/70 text-xs">
-                  {new Date(o.created_at).toLocaleDateString("el-GR", { day: "2-digit", month: "short" })}
+                  {o.createdAt instanceof Date
+                    ? o.createdAt.toLocaleDateString("el-GR", {
+                        day: "2-digit",
+                        month: "short",
+                      })
+                    : ""}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-        {(!orders || orders.length === 0) && (
+        {rows.length === 0 && (
           <p className="text-center text-[#502e23]/70 py-12">Καμία παραγγελία.</p>
         )}
       </div>

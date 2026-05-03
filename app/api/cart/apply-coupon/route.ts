@@ -1,7 +1,7 @@
 // app/api/cart/apply-coupon/route.ts
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
-import { validateCoupon, calculateDiscount } from "@/lib/supabase-api"
+import { validateCoupon, calculateDiscount } from "@/lib/db-queries"
 
 export async function POST(request: NextRequest) {
   try {

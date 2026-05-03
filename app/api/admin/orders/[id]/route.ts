@@ -1,5 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getSupabaseServiceClient } from "@/lib/supabase-server"
+import { eq } from "drizzle-orm"
+import { db } from "@/lib/db"
+import { orders } from "@/lib/db/schema"
 
 interface Ctx {
   params: Promise<{ id: string }>
@@ -7,21 +9,13 @@ interface Ctx {
 
 export async function PUT(request: NextRequest, { params }: Ctx) {
   const { id } = await params
-  const supabase = getSupabaseServiceClient()
   const body = await request.json()
 
-  const allowed = ["status", "payment_status", "notes"] as const
-  const update: Record<string, unknown> = {}
-  for (const key of allowed) {
-    if (key in body) update[key] = body[key]
-  }
+  const update: Record<string, unknown> = { updatedAt: new Date() }
+  if (body.status !== undefined) update.status = body.status
+  if (body.payment_status !== undefined) update.paymentStatus = body.payment_status
+  if (body.notes !== undefined) update.notes = body.notes
 
-  const { data, error } = await supabase
-    .from("orders")
-    .update(update)
-    .eq("id", id)
-    .select()
-    .single()
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ success: true, order: data })
+  const [order] = await db.update(orders).set(update).where(eq(orders.id, id)).returning()
+  return NextResponse.json({ success: true, order })
 }

@@ -1,19 +1,30 @@
-import { getSupabaseServiceClient } from "@/lib/supabase-server"
+import { asc } from "drizzle-orm"
+import { db } from "@/lib/db"
+import { categories } from "@/lib/db/schema"
 import { AdminPageHeader } from "@/components/admin/page-header"
 import { SimpleCrudList } from "@/components/admin/simple-crud-list"
 
 export const dynamic = "force-dynamic"
 
 export default async function CategoriesAdmin() {
-  const supabase = getSupabaseServiceClient()
-  const { data } = await supabase.from("categories").select("*").order("sort_order")
+  const rows = await db.select().from(categories).orderBy(asc(categories.sortOrder))
+
+  // Map db column names → API/form field names so SimpleCrudList works as before
+  const data = rows.map((c) => ({
+    id: c.id,
+    name: c.name,
+    slug: c.slug,
+    description: c.description ?? "",
+    image_url: c.imageUrl ?? "",
+    sort_order: c.sortOrder,
+  }))
 
   return (
     <div>
       <AdminPageHeader eyebrow="catalog" title="Κατηγορίες" />
       <SimpleCrudList
         endpoint="/api/admin/categories"
-        rows={data || []}
+        rows={data}
         itemNoun="κατηγορίας"
         newDefaults={{ sort_order: 0 }}
         columns={[

@@ -1,6 +1,9 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { eq } from "drizzle-orm"
 import { getStripeClient, STRIPE_WEBHOOK_SECRET } from "@/lib/stripe"
-import { getServerClient, decrementStock, incrementCouponUsage } from "@/lib/supabase-api"
+import { db } from "@/lib/db"
+import { orderItems, orders } from "@/lib/db/schema"
+import { decrementStock, incrementCouponUsage } from "@/lib/db-queries"
 
 export const runtime = "nodejs"
 
@@ -21,46 +24,46 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid signature" }, { status: 400 })
   }
 
-  const supabase = getServerClient()
-
   switch (event.type) {
     case "checkout.session.completed": {
       const session = event.data.object
       const orderId = session.metadata?.order_id
       if (!orderId) break
 
-      // Update order
-      await supabase
-        .from("orders")
-        .update({
+      await db
+        .update(orders)
+        .set({
           status: "paid",
-          payment_status: "completed",
-          stripe_session_id: session.id,
-          stripe_payment_intent_id: session.payment_intent as string,
+          paymentStatus: "completed",
+          stripeSessionId: session.id,
+          stripePaymentIntentId: session.payment_intent as string,
+          updatedAt: new Date(),
         })
-        .eq("id", orderId)
+        .where(eq(orders.id, orderId))
 
-      // Decrement stock
-      const { data: items } = await supabase
-        .from("order_items")
-        .select("product_id, variant_id, quantity")
-        .eq("order_id", orderId)
+      // Decrement stock for each item
+      const items = await db
+        .select({
+          productId: orderItems.productId,
+          variantId: orderItems.variantId,
+          quantity: orderItems.quantity,
+        })
+        .from(orderItems)
+        .where(eq(orderItems.orderId, orderId))
 
-      for (const item of items || []) {
-        if (item.product_id) {
-          await decrementStock(item.product_id, item.quantity, item.variant_id)
+      for (const item of items) {
+        if (item.productId) {
+          await decrementStock(item.productId, item.quantity, item.variantId ?? undefined)
         }
       }
 
-      // Increment coupon usage
-      const { data: order } = await supabase
-        .from("orders")
-        .select("coupon_id")
-        .eq("id", orderId)
-        .single()
-
-      if (order?.coupon_id) {
-        await incrementCouponUsage(order.coupon_id)
+      // Increment coupon usage if any
+      const order = await db.query.orders.findFirst({
+        where: eq(orders.id, orderId),
+        columns: { couponId: true },
+      })
+      if (order?.couponId) {
+        await incrementCouponUsage(order.couponId)
       }
       break
     }
@@ -70,21 +73,24 @@ export async function POST(request: NextRequest) {
       const session = event.data.object
       const orderId = session.metadata?.order_id
       if (!orderId) break
-      await supabase
-        .from("orders")
-        .update({ status: "cancelled", payment_status: "failed" })
-        .eq("id", orderId)
+      await db
+        .update(orders)
+        .set({ status: "cancelled", paymentStatus: "failed", updatedAt: new Date() })
+        .where(eq(orders.id, orderId))
       break
     }
 
     case "charge.refunded": {
       const charge = event.data.object
-      const intent = typeof charge.payment_intent === "string" ? charge.payment_intent : charge.payment_intent?.id
+      const intent =
+        typeof charge.payment_intent === "string"
+          ? charge.payment_intent
+          : charge.payment_intent?.id
       if (!intent) break
-      await supabase
-        .from("orders")
-        .update({ status: "refunded", payment_status: "refunded" })
-        .eq("stripe_payment_intent_id", intent)
+      await db
+        .update(orders)
+        .set({ status: "refunded", paymentStatus: "refunded", updatedAt: new Date() })
+        .where(eq(orders.stripePaymentIntentId, intent))
       break
     }
   }

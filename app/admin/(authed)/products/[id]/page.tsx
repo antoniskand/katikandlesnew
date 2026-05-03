@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation"
-import { getSupabaseServiceClient } from "@/lib/supabase-server"
+import { asc, eq } from "drizzle-orm"
+import { db } from "@/lib/db"
+import { categories, productCategories, products } from "@/lib/db/schema"
 import { AdminPageHeader } from "@/components/admin/page-header"
 import { ProductForm } from "@/components/admin/product-form"
 
@@ -11,18 +13,19 @@ interface PageProps {
 
 export default async function EditProductPage({ params }: PageProps) {
   const { id } = await params
-  const supabase = getSupabaseServiceClient()
 
-  const [productRes, categoriesRes, linkRes] = await Promise.all([
-    supabase.from("products").select("*").eq("id", id).single(),
-    supabase.from("categories").select("id, name, slug").order("sort_order"),
-    supabase.from("product_categories").select("category_id").eq("product_id", id),
+  const [product, cats, links] = await Promise.all([
+    db.query.products.findFirst({ where: eq(products.id, id) }),
+    db.select().from(categories).orderBy(asc(categories.sortOrder)),
+    db
+      .select({ categoryId: productCategories.categoryId })
+      .from(productCategories)
+      .where(eq(productCategories.productId, id)),
   ])
 
-  if (productRes.error || !productRes.data) notFound()
+  if (!product) notFound()
 
-  const product = productRes.data as any
-  const categoryIds = (linkRes.data || []).map((r: any) => r.category_id)
+  const categoryIds = links.map((r) => r.categoryId)
 
   return (
     <div>
@@ -36,18 +39,18 @@ export default async function EditProductPage({ params }: PageProps) {
           id: product.id,
           name: product.name,
           slug: product.slug,
-          description: product.description,
+          description: product.description ?? "",
           price: Number(product.price),
-          sale_price: product.sale_price ? Number(product.sale_price) : null,
+          sale_price: product.salePrice != null ? Number(product.salePrice) : null,
           currency: product.currency,
-          images: Array.isArray(product.images) ? product.images : [],
-          stock_status: product.stock_status,
-          stock_level: product.stock_level,
-          stock_tracking: product.stock_tracking,
+          images: Array.isArray(product.images) ? (product.images as any[]) : [],
+          stock_status: product.stockStatus,
+          stock_level: product.stockLevel ?? 0,
+          stock_tracking: !!product.stockTracking,
           active: product.active,
           categoryIds,
         }}
-        categories={categoriesRes.data || []}
+        categories={cats}
       />
     </div>
   )

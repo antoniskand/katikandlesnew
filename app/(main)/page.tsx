@@ -6,7 +6,7 @@ import { FeaturesSection } from "@/components/features-section"
 import { AboutSection } from "@/components/about-section"
 import { NewsletterSection } from "@/components/newsletter-section"
 import type { Product } from "@/types/product"
-import { getProducts, getFeaturedDrop } from "@/lib/supabase-api"
+import { getProducts, getFeaturedDrop } from "@/lib/db-queries"
 
 export const revalidate = 60
 

@@ -1,6 +1,6 @@
 // app/sitemap.ts
 import type { MetadataRoute } from "next"
-import { getProducts } from "@/lib/supabase-api"
+import { getProducts } from "@/lib/db-queries"
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://katikandles.gr"

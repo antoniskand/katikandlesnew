@@ -1,6 +1,8 @@
 import type React from "react"
 import type { Metadata, Viewport } from "next"
 import "../styles/globals.css"
+import { StackProvider, StackTheme } from "@stackframe/stack"
+import { stackServerApp } from "@/stack"
 import { Toaster } from "@/components/ui/toaster"
 import { CartProvider } from "@/context/cart-context"
 import { ToastContextProvider } from "@/context/toast-context"
@@ -76,12 +78,16 @@ export default function RootLayout({
       </head>
       <body className="font-sans antialiased">
         <OrganizationJsonLd />
-        <ToastContextProvider>
-          <CartProvider>
-            {children}
-            <Toaster />
-          </CartProvider>
-        </ToastContextProvider>
+        <StackProvider app={stackServerApp}>
+          <StackTheme>
+            <ToastContextProvider>
+              <CartProvider>
+                {children}
+                <Toaster />
+              </CartProvider>
+            </ToastContextProvider>
+          </StackTheme>
+        </StackProvider>
       </body>
     </html>
   )

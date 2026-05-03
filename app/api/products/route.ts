@@ -1,6 +1,6 @@
 // app/api/products/route.ts
 import { type NextRequest, NextResponse } from "next/server"
-import { getProducts } from "@/lib/supabase-api"
+import { getProducts } from "@/lib/db-queries"
 
 export async function GET(request: NextRequest) {
   try {

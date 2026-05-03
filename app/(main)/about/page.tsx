@@ -1,6 +1,6 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
-import { getPage } from "@/lib/supabase-api"
+import { getPage } from "@/lib/db-queries"
 import { BreadcrumbJsonLd } from "@/components/seo/json-ld"
 
 export const revalidate = 3600

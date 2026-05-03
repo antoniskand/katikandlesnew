@@ -1,18 +1,16 @@
 import Link from "next/link"
 import Image from "next/image"
 import { Plus, Edit, Eye, EyeOff } from "lucide-react"
-import { getSupabaseServiceClient } from "@/lib/supabase-server"
+import { desc } from "drizzle-orm"
+import { db } from "@/lib/db"
+import { products } from "@/lib/db/schema"
 import { AdminPageHeader } from "@/components/admin/page-header"
 import { formatPrice } from "@/lib/utils"
 
 export const dynamic = "force-dynamic"
 
 export default async function ProductsAdmin() {
-  const supabase = getSupabaseServiceClient()
-  const { data: products } = await supabase
-    .from("products")
-    .select("id, name, slug, price, sale_price, images, stock_status, stock_level, active, created_at")
-    .order("created_at", { ascending: false })
+  const rows = await db.select().from(products).orderBy(desc(products.createdAt))
 
   return (
     <div>
@@ -43,9 +41,10 @@ export default async function ProductsAdmin() {
                 <th className="px-4 py-3"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-ink/5">
-              {(products || []).map((p: any) => {
-                const img = Array.isArray(p.images) && p.images.length > 0 ? p.images[0]?.url : null
+            <tbody className="divide-y divide-[#1a1a1a]/5">
+              {rows.map((p) => {
+                const imgs = p.images as { url?: string }[] | undefined
+                const img = Array.isArray(imgs) && imgs.length > 0 ? imgs[0]?.url : null
                 return (
                   <tr key={p.id} className="hover:bg-[#f7e7ce]/50">
                     <td className="px-4 py-3">
@@ -60,18 +59,16 @@ export default async function ProductsAdmin() {
                       <p className="text-xs text-[#502e23]/70">/{p.slug}</p>
                     </td>
                     <td className="px-4 py-3 font-medium">
-                      {p.sale_price ? (
+                      {p.salePrice ? (
                         <>
-                          <span className="text-[#ff6b35]">{formatPrice(p.sale_price)}</span>
-                          <span className="ml-2 text-xs line-through text-[#502e23]/70">{formatPrice(p.price)}</span>
+                          <span className="text-[#ff6b35]">{formatPrice(Number(p.salePrice))}</span>
+                          <span className="ml-2 text-xs line-through text-[#502e23]/70">{formatPrice(Number(p.price))}</span>
                         </>
                       ) : (
-                        formatPrice(p.price)
+                        formatPrice(Number(p.price))
                       )}
                     </td>
-                    <td className="px-4 py-3 text-[#502e23]/70">
-                      {p.stock_level ?? "—"}
-                    </td>
+                    <td className="px-4 py-3 text-[#502e23]/70">{p.stockLevel ?? "—"}</td>
                     <td className="px-4 py-3">
                       <span
                         className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full ${
@@ -89,8 +86,7 @@ export default async function ProductsAdmin() {
                         href={`/admin/products/${p.id}`}
                         className="inline-flex items-center gap-1 text-[#ff6b35] hover:underline text-sm font-medium"
                       >
-                        <Edit className="h-3.5 w-3.5" />
-                        edit
+                        <Edit className="h-3.5 w-3.5" /> edit
                       </Link>
                     </td>
                   </tr>
@@ -99,7 +95,7 @@ export default async function ProductsAdmin() {
             </tbody>
           </table>
 
-          {(!products || products.length === 0) && (
+          {rows.length === 0 && (
             <div className="text-center text-[#502e23]/70 py-16">
               Δεν υπάρχουν προϊόντα. Πρόσθεσε το πρώτο σου.
             </div>

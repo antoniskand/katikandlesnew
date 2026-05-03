@@ -1,7 +1,10 @@
 import { type NextRequest, NextResponse } from "next/server"
 import type Stripe from "stripe"
+import { eq } from "drizzle-orm"
 import { getStripeClient } from "@/lib/stripe"
-import { createOrder } from "@/lib/supabase-api"
+import { createOrder } from "@/lib/db-queries"
+import { db } from "@/lib/db"
+import { orders } from "@/lib/db/schema"
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
 
@@ -150,11 +153,10 @@ export async function POST(request: NextRequest) {
     })
 
     // Store session_id on the order
-    const { getServerClient } = await import("@/lib/supabase-api")
-    await getServerClient()
-      .from("orders")
-      .update({ stripe_session_id: session.id })
-      .eq("id", order.id)
+    await db
+      .update(orders)
+      .set({ stripeSessionId: session.id, updatedAt: new Date() })
+      .where(eq(orders.id, order.id))
 
     return NextResponse.json({ url: session.url, orderId: order.id })
   } catch (error) {

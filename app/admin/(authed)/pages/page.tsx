@@ -1,16 +1,14 @@
 import Link from "next/link"
 import { Plus, FileText } from "lucide-react"
-import { getSupabaseServiceClient } from "@/lib/supabase-server"
+import { asc } from "drizzle-orm"
+import { db } from "@/lib/db"
+import { pages } from "@/lib/db/schema"
 import { AdminPageHeader } from "@/components/admin/page-header"
 
 export const dynamic = "force-dynamic"
 
 export default async function PagesAdmin() {
-  const supabase = getSupabaseServiceClient()
-  const { data: pages } = await supabase
-    .from("pages")
-    .select("*")
-    .order("name")
+  const rows = await db.select().from(pages).orderBy(asc(pages.name))
 
   return (
     <div>
@@ -25,7 +23,7 @@ export default async function PagesAdmin() {
       />
 
       <div className="grid gap-3">
-        {(pages || []).map((p: any) => (
+        {rows.map((p) => (
           <Link
             key={p.id}
             href={`/admin/pages/${p.id}`}
@@ -41,7 +39,9 @@ export default async function PagesAdmin() {
             </div>
             <span
               className={`text-xs font-medium px-2 py-1 rounded-full ${
-                p.active ? "bg-[#0f9b81]/15 text-[#0f9b81]" : "bg-[#1a1a1a]/10 text-[#502e23]/70"
+                p.active
+                  ? "bg-[#0f9b81]/15 text-[#0f9b81]"
+                  : "bg-[#1a1a1a]/10 text-[#502e23]/70"
               }`}
             >
               {p.active ? "δημοσιευμένη" : "πρόχειρο"}
@@ -49,7 +49,7 @@ export default async function PagesAdmin() {
           </Link>
         ))}
 
-        {(!pages || pages.length === 0) && (
+        {rows.length === 0 && (
           <div className="text-center text-[#502e23]/70 py-16 bg-white rounded-3xl border-2 border-dashed border-[#1a1a1a]/20">
             Δεν υπάρχουν σελίδες ακόμη.
           </div>

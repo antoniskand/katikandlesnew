@@ -1,26 +1,23 @@
 import { NextResponse } from "next/server"
-import { getSupabaseServiceClient } from "@/lib/supabase-server"
+import { desc } from "drizzle-orm"
+import { db } from "@/lib/db"
+import { newsletterSubscribers } from "@/lib/db/schema"
 
 export async function GET() {
-  const supabase = getSupabaseServiceClient()
-  const { data: subscribers, error } = await supabase
-    .from("newsletter_subscribers")
-    .select("*")
-    .order("subscribed_at", { ascending: false })
-
-  if (error) {
-    return NextResponse.json({ error: "Failed to fetch subscribers" }, { status: 500 })
-  }
+  const subs = await db
+    .select()
+    .from(newsletterSubscribers)
+    .orderBy(desc(newsletterSubscribers.subscribedAt))
 
   const headers = ["Email", "Subscribed At", "Status", "Source"]
-  const rows = (subscribers || []).map((sub) => [
-    sub.email,
-    new Date(sub.subscribed_at).toISOString(),
-    sub.status || "active",
-    sub.source || "",
+  const rows = subs.map((s) => [
+    s.email,
+    s.subscribedAt instanceof Date ? s.subscribedAt.toISOString() : String(s.subscribedAt),
+    s.status || "active",
+    s.source || "",
   ])
 
-  const csv = [headers.join(","), ...rows.map((row) => row.join(","))].join("\n")
+  const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n")
 
   return new NextResponse(csv, {
     headers: {

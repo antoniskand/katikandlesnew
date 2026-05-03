@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation"
-import { getSupabaseServiceClient } from "@/lib/supabase-server"
+import { desc, eq } from "drizzle-orm"
+import { db } from "@/lib/db"
+import { drops, products } from "@/lib/db/schema"
 import { AdminPageHeader } from "@/components/admin/page-header"
 import { DropForm } from "@/components/admin/drop-form"
 
@@ -11,23 +13,38 @@ interface PageProps {
 
 export default async function EditDropPage({ params }: PageProps) {
   const { id } = await params
-  const supabase = getSupabaseServiceClient()
 
-  const [dropRes, productsRes] = await Promise.all([
-    supabase.from("drops").select("*").eq("id", id).single(),
-    supabase.from("products").select("id, name, images").eq("active", true).order("created_at", { ascending: false }),
+  const [drop, productRows] = await Promise.all([
+    db.query.drops.findFirst({ where: eq(drops.id, id) }),
+    db
+      .select({ id: products.id, name: products.name, images: products.images })
+      .from(products)
+      .where(eq(products.active, true))
+      .orderBy(desc(products.createdAt)),
   ])
 
-  if (dropRes.error || !dropRes.data) notFound()
+  if (!drop) notFound()
 
   return (
     <div>
       <AdminPageHeader
         eyebrow="releases"
-        title={dropRes.data.name}
+        title={drop.name}
         back={{ href: "/admin/drops", label: "πίσω στα drops" }}
       />
-      <DropForm initial={dropRes.data} products={(productsRes.data as any) || []} />
+      <DropForm
+        initial={{
+          ...drop,
+          background_color: drop.backgroundColor,
+          product_ids: Array.isArray(drop.productIds) ? drop.productIds : [],
+          starts_at: drop.startsAt instanceof Date ? drop.startsAt.toISOString() : null,
+          ends_at: drop.endsAt instanceof Date ? drop.endsAt.toISOString() : null,
+          hero_image_url: drop.heroImageUrl,
+          badge_text: drop.badgeText,
+          sort_order: drop.sortOrder,
+        }}
+        products={productRows as any}
+      />
     </div>
   )
 }

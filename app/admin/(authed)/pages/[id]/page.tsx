@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation"
-import { getSupabaseServiceClient } from "@/lib/supabase-server"
+import { eq } from "drizzle-orm"
+import { db } from "@/lib/db"
+import { pages } from "@/lib/db/schema"
 import { AdminPageHeader } from "@/components/admin/page-header"
 import { PageForm } from "@/components/admin/page-form"
 
@@ -11,19 +13,26 @@ interface PageProps {
 
 export default async function EditPageRoute({ params }: PageProps) {
   const { id } = await params
-  const supabase = getSupabaseServiceClient()
-  const { data, error } = await supabase.from("pages").select("*").eq("id", id).single()
-
-  if (error || !data) notFound()
+  const page = await db.query.pages.findFirst({ where: eq(pages.id, id) })
+  if (!page) notFound()
 
   return (
     <div>
       <AdminPageHeader
         eyebrow="cms"
-        title={data.name}
+        title={page.name}
         back={{ href: "/admin/pages", label: "πίσω στις σελίδες" }}
       />
-      <PageForm initial={data} />
+      <PageForm
+        initial={{
+          id: page.id,
+          name: page.name,
+          slug: page.slug,
+          content: page.content ?? "",
+          meta_description: page.metaDescription ?? "",
+          active: page.active,
+        }}
+      />
     </div>
   )
 }

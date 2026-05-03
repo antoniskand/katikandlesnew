@@ -1,12 +1,10 @@
 "use server"
 
 import { z } from "zod"
-import { createClient } from "@supabase/supabase-js"
+import { eq } from "drizzle-orm"
+import { db } from "@/lib/db"
+import { newsletterSubscribers } from "@/lib/db/schema"
 
-// Create Supabase client for server-side operations
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
-
-// Email validation schema
 const emailSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
 })
@@ -16,108 +14,55 @@ type SubscribeResult = {
   message: string
 }
 
-export async function subscribeToNewsletter(formData: FormData): Promise<SubscribeResult> {
+export async function subscribeToNewsletter(
+  formData: FormData,
+): Promise<SubscribeResult> {
   try {
-    // Get email from form data
     const email = formData.get("email") as string
 
-    // Validate email
-    const result = emailSchema.safeParse({ email })
-    if (!result.success) {
-      return {
-        success: false,
-        message: "Please enter a valid email address",
-      }
+    const parsed = emailSchema.safeParse({ email })
+    if (!parsed.success) {
+      return { success: false, message: "Παρακαλώ δώσε ένα έγκυρο email." }
     }
 
-    // Normalize email (lowercase and trim)
-    const normalizedEmail = email.toLowerCase().trim()
+    const normalized = email.toLowerCase().trim()
 
-    // Check if email already exists
-    const { data: existingSubscriber, error: checkError } = await supabase
-      .from("newsletter_subscribers")
-      .select("id, status")
-      .eq("email", normalizedEmail)
-      .single()
+    const existing = await db.query.newsletterSubscribers.findFirst({
+      where: eq(newsletterSubscribers.email, normalized),
+    })
 
-    if (checkError && checkError.code !== "PGRST116") {
-      console.error("Error checking for existing subscriber:", checkError)
-      return {
-        success: false,
-        message: "Something went wrong. Please try again later.",
-      }
-    }
-
-    if (existingSubscriber) {
-      // If user was previously unsubscribed, reactivate them
-      if (existingSubscriber.status === "unsubscribed") {
-        const { error: updateError } = await supabase
-          .from("newsletter_subscribers")
-          .update({
-            status: "active",
-            subscribed_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", existingSubscriber.id)
-
-        if (updateError) {
-          console.error("Error reactivating subscriber:", updateError)
-          return {
-            success: false,
-            message: "Something went wrong. Please try again later.",
-          }
-        }
-
+    if (existing) {
+      if (existing.status === "unsubscribed") {
+        await db
+          .update(newsletterSubscribers)
+          .set({ status: "active", subscribedAt: new Date() })
+          .where(eq(newsletterSubscribers.id, existing.id))
         return {
           success: true,
-          message: "Welcome back! You've been resubscribed to our newsletter.",
+          message: "Καλώς ήρθες πίσω! Ξανά μέλος του newsletter.",
         }
       }
-
-      // Email already exists and is active
       return {
         success: true,
-        message: "You're already subscribed to our newsletter!",
+        message: "Είσαι ήδη εγγεγραμμένος στο newsletter.",
       }
     }
 
-    // Insert new subscriber
-    const { error: insertError } = await supabase.from("newsletter_subscribers").insert([
-      {
-        email: normalizedEmail,
-        source: "website_homepage",
-        status: "active",
-      },
-    ])
-
-    if (insertError) {
-      console.error("Error inserting subscriber:", insertError)
-
-      // If it's a unique constraint violation, the email was added concurrently
-      if (insertError.code === "23505") {
-        return {
-          success: true,
-          message: "Thank you for subscribing to our newsletter!",
-        }
-      }
-
-      return {
-        success: false,
-        message: "Something went wrong. Please try again later.",
-      }
-    }
-
-    console.log(`New newsletter subscriber: ${normalizedEmail}`)
+    await db.insert(newsletterSubscribers).values({
+      email: normalized,
+      source: "website_homepage",
+      status: "active",
+    })
 
     return {
       success: true,
-      message: "Thank you for subscribing to our newsletter!",
+      message: "Ευχαριστούμε για την εγγραφή στο newsletter!",
     }
   } catch (error) {
     console.error("Newsletter subscription error:", error)
     return {
       success: false,
-      message: "Something went wrong. Please try again later.",
+      message: "Κάτι πήγε στραβά. Δοκίμασε ξανά αργότερα.",
     }
   }
 }
