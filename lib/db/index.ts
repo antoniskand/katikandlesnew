@@ -1,39 +1,26 @@
 // lib/db/index.ts
 // Neon serverless + Drizzle client.
-//
-// Lazily-initialised so that importing this module at build time (e.g. during
-// `next build` page-data collection) doesn't call `neon()` before DATABASE_URL
-// is available. The Proxy below defers the connection until the first query.
 
 import { neon } from "@neondatabase/serverless"
-import { drizzle, type NeonHttpDatabase } from "drizzle-orm/neon-http"
+import { drizzle } from "drizzle-orm/neon-http"
 import * as schema from "./schema"
 
-type Db = NeonHttpDatabase<typeof schema>
+const url = process.env.DATABASE_URL || process.env.NEON_DATABASE_URL
 
-let cached: Db | null = null
-
-function getDbInstance(): Db {
-  if (cached) return cached
-  // Accept either DATABASE_URL (manual) or NEON_DATABASE_URL (Vercel-Neon integration).
-  const url = process.env.DATABASE_URL || process.env.NEON_DATABASE_URL
-  if (!url) {
-    throw new Error(
-      "Neither DATABASE_URL nor NEON_DATABASE_URL is set. Configure one in Vercel → Settings → Environment Variables.",
-    )
-  }
-  const client = neon(url)
-  cached = drizzle(client, { schema })
-  return cached
+if (!url) {
+  // Don't crash at module load (e.g. during certain build phases). The neon()
+  // call below with an empty string returns a function that errors on first
+  // use, which gives a clearer runtime error than a build-time crash.
+  console.warn(
+    "DATABASE_URL / NEON_DATABASE_URL is not set. Database calls will fail at runtime.",
+  )
 }
 
-export const db: Db = new Proxy({} as Db, {
-  get(_target, prop) {
-    const instance = getDbInstance() as any
-    const value = instance[prop]
-    return typeof value === "function" ? value.bind(instance) : value
-  },
-})
+const client = neon(url || "postgresql://invalid")
+
+// Real Drizzle instance — needed because @auth/drizzle-adapter inspects this
+// object's internals to detect the SQL dialect. A Proxy breaks that detection.
+export const db = drizzle(client, { schema })
 
 export { schema }
 export * from "./schema"
