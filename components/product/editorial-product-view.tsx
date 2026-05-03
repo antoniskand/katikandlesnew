@@ -4,7 +4,7 @@ import { useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
-import { ArrowLeft, Minus, Plus, ChevronDown } from "lucide-react"
+import { ArrowLeft, Minus, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { AddToCartButton } from "@/components/add-to-cart-button"
 import { formatPrice } from "@/lib/utils"
@@ -334,79 +334,104 @@ export function EditorialProductView({ product }: EditorialProductViewProps) {
         </div>
       </section>
 
-      {/* === DETAILS: collapsible sections === */}
-      <section className="bg-[#fafaf7] px-6 md:px-12 lg:px-16 py-16 md:py-24">
-        <div className="max-w-3xl">
-          <p className="text-[11px] tracking-[0.22em] uppercase text-[#1a1a1a]/50 mb-2">
-            details
-          </p>
-          <h2 className="headline-md text-[#1a1a1a] mb-10">όλα όσα θες να ξέρεις</h2>
-
-          <div className="border-t border-[#1a1a1a]/12">
-            {product.description && (
-              <Section
-                title="περιγραφή"
-                open={openSections.has("description")}
-                onToggle={() => toggleSection("description")}
-              >
-                <div
-                  className="text-[#1a1a1a]/75 leading-relaxed prose prose-sm max-w-none prose-p:text-[#1a1a1a]/75 prose-strong:text-[#1a1a1a] prose-a:text-[#ff6b35]"
-                  dangerouslySetInnerHTML={{ __html: product.description }}
-                />
-              </Section>
-            )}
-
-            {isCandle && (
-              <Section
-                title="οδηγίες καύσης"
-                open={openSections.has("burning")}
-                onToggle={() => toggleSection("burning")}
-              >
-                <div className="text-[#1a1a1a]/75 space-y-4 leading-relaxed">
-                  <p className="text-[#1a1a1a]">
-                    Για να κρατήσει το κερί σου όσο περισσότερο γίνεται:
-                  </p>
-                  <ul className="space-y-3 list-disc pl-5 text-sm">
-                    <li>
-                      <strong className="text-[#1a1a1a]">Πρώτη φορά;</strong> Άναψέ το και
-                      άφησέ το να λιώσει ομοιόμορφα μέχρι την άκρη — ιδανικά τουλάχιστον 1 ώρα.
-                    </li>
-                    <li>
-                      <strong className="text-[#1a1a1a]">Μετά;</strong> Κάθε καύση μπορεί να
-                      διαρκεί έως 3 ώρες. Έτσι κρατάς το άρωμα έντονο και το κερί σε φόρμα.
-                    </li>
-                    <li>
-                      <strong className="text-[#1a1a1a]">Το φυτίλι θέλει αγάπη.</strong> Πριν
-                      από κάθε χρήση, κόψε το στα 5mm — καίει καλύτερα, χωρίς μεγάλη φλόγα ή καπνό.
-                    </li>
-                    <li>
-                      <strong className="text-[#1a1a1a]">Το καλύτερο;</strong> Όσο καίει, πάρε
-                      λίγο λιωμένο κερί στο δάχτυλο και άπλωσέ το στα χέρια. Skin-safe — λειτουργεί σαν βελούδινη κρέμα.
-                    </li>
-                  </ul>
-                </div>
-              </Section>
-            )}
-
-            <Section
-              title="αποστολές & επιστροφές"
-              open={openSections.has("shipping")}
-              onToggle={() => toggleSection("shipping")}
-            >
-              <div className="text-[#1a1a1a]/75 space-y-2 text-sm leading-relaxed">
-                <p>Δωρεάν αποστολή για παραγγελίες άνω των 30€ εντός Ελλάδας.</p>
-                <p>Αποστολή σε 1-3 εργάσιμες με Courier ή BoxNow.</p>
-                <p>
-                  <Link
-                    href="/shipping-returns"
-                    className="text-[#1a1a1a] border-b border-[#1a1a1a]/30 hover:border-[#1a1a1a] pb-0.5"
-                  >
-                    Αναλυτικοί όροι →
-                  </Link>
-                </p>
-              </div>
-            </Section>
+      {/* === DETAILS: numbered editorial accordion === */}
+      <section className="bg-[#fafaf7] px-6 md:px-12 lg:px-16 py-20 md:py-28">
+        <div className="max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-[auto_1fr] gap-10 md:gap-16 mb-14 md:mb-20">
+            <p className="text-[11px] tracking-[0.22em] uppercase text-[#1a1a1a]/50 md:pt-2">
+              σημειώσεις
+            </p>
+            <h2 className="headline-md text-[#1a1a1a]">
+              όλα όσα θες
+              <br className="hidden md:block" />
+              να ξέρεις
+            </h2>
           </div>
+
+          {(() => {
+            const items: Array<{
+              key: string
+              title: string
+              content: React.ReactNode
+            }> = []
+            if (product.description) {
+              items.push({
+                key: "description",
+                title: "περιγραφή",
+                content: (
+                  <div
+                    className="text-[#1a1a1a]/75 leading-relaxed prose prose-sm max-w-none prose-p:text-[#1a1a1a]/75 prose-strong:text-[#1a1a1a] prose-a:text-[#ff6b35]"
+                    dangerouslySetInnerHTML={{ __html: product.description }}
+                  />
+                ),
+              })
+            }
+            if (isCandle) {
+              items.push({
+                key: "burning",
+                title: "οδηγίες καύσης",
+                content: (
+                  <div className="text-[#1a1a1a]/75 space-y-4 leading-relaxed">
+                    <p className="text-[#1a1a1a]">
+                      Για να κρατήσει το κερί σου όσο περισσότερο γίνεται:
+                    </p>
+                    <ul className="space-y-3 list-disc pl-5 text-sm">
+                      <li>
+                        <strong className="text-[#1a1a1a]">Πρώτη φορά;</strong> Άναψέ το και
+                        άφησέ το να λιώσει ομοιόμορφα μέχρι την άκρη — ιδανικά τουλάχιστον 1 ώρα.
+                      </li>
+                      <li>
+                        <strong className="text-[#1a1a1a]">Μετά;</strong> Κάθε καύση μπορεί
+                        να διαρκεί έως 3 ώρες. Έτσι κρατάς το άρωμα έντονο και το κερί σε φόρμα.
+                      </li>
+                      <li>
+                        <strong className="text-[#1a1a1a]">Το φυτίλι θέλει αγάπη.</strong> Πριν
+                        από κάθε χρήση, κόψε το στα 5mm — καίει καλύτερα, χωρίς μεγάλη φλόγα ή καπνό.
+                      </li>
+                      <li>
+                        <strong className="text-[#1a1a1a]">Το καλύτερο;</strong> Όσο καίει,
+                        πάρε λίγο λιωμένο κερί στο δάχτυλο και άπλωσέ το στα χέρια. Skin-safe — λειτουργεί σαν βελούδινη κρέμα.
+                      </li>
+                    </ul>
+                  </div>
+                ),
+              })
+            }
+            items.push({
+              key: "shipping",
+              title: "αποστολές & επιστροφές",
+              content: (
+                <div className="text-[#1a1a1a]/75 space-y-2 text-sm leading-relaxed">
+                  <p>Δωρεάν αποστολή για παραγγελίες άνω των 30€ εντός Ελλάδας.</p>
+                  <p>Αποστολή σε 1-3 εργάσιμες με Courier ή BoxNow.</p>
+                  <p>
+                    <Link
+                      href="/shipping-returns"
+                      className="text-[#1a1a1a] border-b border-[#1a1a1a]/30 hover:border-[#1a1a1a] pb-0.5"
+                    >
+                      Αναλυτικοί όροι →
+                    </Link>
+                  </p>
+                </div>
+              ),
+            })
+
+            return (
+              <div className="border-t border-[#1a1a1a]">
+                {items.map((item, idx) => (
+                  <Section
+                    key={item.key}
+                    index={idx + 1}
+                    title={item.title}
+                    open={openSections.has(item.key)}
+                    onToggle={() => toggleSection(item.key)}
+                  >
+                    {item.content}
+                  </Section>
+                ))}
+              </div>
+            )
+          })()}
         </div>
       </section>
     </div>
@@ -414,28 +439,50 @@ export function EditorialProductView({ product }: EditorialProductViewProps) {
 }
 
 function Section({
+  index,
   title,
   open,
   onToggle,
   children,
 }: {
+  index: number
   title: string
   open: boolean
   onToggle: () => void
   children: React.ReactNode
 }) {
+  const num = String(index).padStart(2, "0")
   return (
-    <div className="border-b border-[#1a1a1a]/12">
+    <div className="border-b border-[#1a1a1a]">
       <button
         onClick={onToggle}
-        className="w-full flex items-center justify-between py-5 text-left group"
+        className="w-full grid grid-cols-[auto_1fr_auto] items-center gap-6 md:gap-10 py-7 md:py-9 text-left group"
       >
-        <span className="text-[#1a1a1a] text-base group-hover:opacity-70 transition-opacity">
+        <span
+          className={`tabular-nums text-sm tracking-[0.1em] transition-colors ${
+            open ? "text-[#1a1a1a]" : "text-[#1a1a1a]/40 group-hover:text-[#1a1a1a]/70"
+          }`}
+        >
+          {num}
+        </span>
+        <span
+          className={`text-xl md:text-2xl tracking-tight lowercase transition-colors ${
+            open ? "text-[#1a1a1a]" : "text-[#1a1a1a]/75 group-hover:text-[#1a1a1a]"
+          }`}
+        >
           {title}
         </span>
-        <ChevronDown
-          className={`w-4 h-4 text-[#1a1a1a]/50 transition-transform ${open ? "rotate-180" : ""}`}
-        />
+        <span
+          className="relative w-5 h-5 shrink-0"
+          aria-hidden
+        >
+          <span className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-px bg-[#1a1a1a]" />
+          <span
+            className={`absolute inset-y-0 left-1/2 -translate-x-1/2 w-px bg-[#1a1a1a] transition-transform duration-300 ${
+              open ? "rotate-90 scale-y-0" : ""
+            }`}
+          />
+        </span>
       </button>
       <AnimatePresence initial={false}>
         {open && (
@@ -443,10 +490,10 @@ function Section({
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             className="overflow-hidden"
           >
-            <div className="pb-6">{children}</div>
+            <div className="pl-0 md:pl-[3.5rem] pb-9 pr-8 md:pr-12">{children}</div>
           </motion.div>
         )}
       </AnimatePresence>
