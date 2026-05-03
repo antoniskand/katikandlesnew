@@ -3,10 +3,8 @@
 import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
-import type { Drop, Product } from "@/types/product"
-import { formatPrice } from "@/lib/utils"
 
-// Inline SVG leaf
+// Inline SVG leaf from the brand elements
 function LeafDecoration({ className = "" }: { className?: string }) {
   return (
     <svg
@@ -27,6 +25,7 @@ function LeafDecoration({ className = "" }: { className?: string }) {
   )
 }
 
+// Inline SVG orange slice from the brand elements (simplified from orange-1.svg)
 function OrangeSliceDecoration({ className = "" }: { className?: string }) {
   return (
     <svg
@@ -49,6 +48,7 @@ function OrangeSliceDecoration({ className = "" }: { className?: string }) {
   )
 }
 
+// Organic blob shape matching the reference images
 function BlobShape({ className = "" }: { className?: string }) {
   return (
     <svg
@@ -65,39 +65,25 @@ function BlobShape({ className = "" }: { className?: string }) {
   )
 }
 
-interface FeaturedDropSectionProps {
-  drop?: Drop | null
-  products?: Product[]
-}
-
-export function AnniversaryDropSection({ drop, products = [] }: FeaturedDropSectionProps) {
-  // Hide entirely if no featured drop is configured in the CMS
-  if (!drop) return null
-
-  const featured = products[0]
-  const bg = drop.background_color || "#FF7A00"
-  const dropName = drop.name || "to zoyme raw"
-  const dropTagline = drop.tagline
-  const dropDescription =
-    drop.description ||
-    "Χειροποίητο κερί σόγιας εμπνευσμένο από τους πορτοκαλεώνες της Ελλάδας. Limited edition, φτιαγμένο με αγάπη."
-
+export function AnniversaryDropSection() {
   return (
     <section
       className="relative py-24 md:py-36 overflow-hidden z-10"
-      style={{ backgroundColor: bg }}
-      id="drops"
+      style={{ backgroundColor: "#FF7A00" }}
     >
+      {/* Decorative floating leaves */}
       <LeafDecoration className="absolute -top-6 -left-10 w-44 md:w-56 opacity-50 pointer-events-none animate-float-slow" />
       <LeafDecoration className="absolute top-16 -right-8 w-36 md:w-48 opacity-40 pointer-events-none rotate-[140deg] animate-float-slower" />
       <LeafDecoration className="absolute -bottom-4 -left-6 w-40 md:w-52 opacity-35 pointer-events-none -rotate-[50deg] animate-float" />
       <LeafDecoration className="absolute bottom-12 -right-12 w-48 md:w-56 opacity-40 pointer-events-none rotate-[110deg] animate-float-slow" />
       <LeafDecoration className="absolute top-1/3 right-1/4 w-24 md:w-32 opacity-20 pointer-events-none rotate-45 animate-float-slower" />
 
+      {/* Background blob */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[500px] text-white/10 pointer-events-none">
         <BlobShape className="w-full h-full" />
       </div>
 
+      {/* MASSIVE Background Typography */}
       <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 z-0 pointer-events-none overflow-hidden">
         <motion.div
           initial={{ opacity: 0, x: -80 }}
@@ -107,14 +93,14 @@ export function AnniversaryDropSection({ drop, products = [] }: FeaturedDropSect
           className="-ml-4"
         >
           <h2 className="text-[28vw] md:text-[22vw] font-light tracking-tighter whitespace-nowrap leading-none text-white opacity-[0.07]">
-            {drop.slug || "limited"}
+            portokali
           </h2>
         </motion.div>
       </div>
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
-          {/* Left: Visual */}
+          {/* Left: Product Visual */}
           <motion.div
             initial={{ opacity: 0, scale: 0.92 }}
             whileInView={{ opacity: 1, scale: 1 }}
@@ -122,32 +108,56 @@ export function AnniversaryDropSection({ drop, products = [] }: FeaturedDropSect
             viewport={{ once: true }}
             className="relative flex items-center justify-center order-2 lg:order-1"
           >
+            {/* Blob behind the product */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
               <BlobShape className="w-[90%] h-[90%] text-white/10" />
             </div>
 
+            {/* Product image - replace src with actual product image */}
             <div className="relative w-64 h-64 md:w-80 md:h-80 lg:w-96 lg:h-96">
+              {/* Orange slice decorations around product */}
               <OrangeSliceDecoration className="absolute -bottom-8 -left-8 w-32 md:w-40 opacity-80 drop-shadow-lg" />
               <OrangeSliceDecoration className="absolute -top-4 -right-4 w-20 md:w-24 opacity-50 rotate-45" />
 
-              <div className="relative w-full h-full rounded-2xl flex items-center justify-center bg-white/10 backdrop-blur-sm border border-white/20 overflow-hidden">
-                {featured?.images?.[0]?.url || drop.hero_image_url ? (
-                  <Image
-                    src={featured?.images?.[0]?.url || drop.hero_image_url!}
-                    alt={featured?.name || dropName}
-                    fill
-                    className="object-contain p-6"
-                    sizes="(max-width: 768px) 256px, (max-width: 1024px) 320px, 384px"
-                    priority
-                  />
-                ) : (
-                  <OrangeSliceDecoration className="w-32 md:w-40 mx-auto drop-shadow-lg" />
-                )}
+              {/* 
+                Replace this placeholder with the actual product image:
+                <Image
+                  src="/path-to-raw-portokali-candle.png"
+                  alt="Raw Portokali Candle"
+                  fill
+                  className="object-contain drop-shadow-2xl"
+                  sizes="(max-width: 768px) 256px, (max-width: 1024px) 320px, 384px"
+                  priority
+                />
+              */}
+              <div className="w-full h-full rounded-2xl flex items-center justify-center bg-white/10 backdrop-blur-sm border border-white/20">
+                <div className="text-center">
+                  <OrangeSliceDecoration className="w-28 md:w-36 mx-auto drop-shadow-lg" />
+                  <p className="text-white/60 text-xs mt-4 uppercase tracking-widest">
+                    product image
+                  </p>
+                </div>
               </div>
             </div>
+
+            {/* Anniversary badge */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.4, type: "spring" }}
+              viewport={{ once: true }}
+              className="absolute -top-2 -right-2 md:top-0 md:right-4 w-20 h-20 md:w-24 md:h-24 rounded-full bg-[#1a1a1a] flex items-center justify-center shadow-xl"
+            >
+              <div className="text-center">
+                <span className="block text-2xl md:text-3xl font-bold text-[#FF7A00]">2</span>
+                <span className="block text-[10px] md:text-xs text-white uppercase tracking-wider leading-tight">
+                  years
+                </span>
+              </div>
+            </motion.div>
           </motion.div>
 
-          {/* Right: Text */}
+          {/* Right: Drop Info */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -155,48 +165,56 @@ export function AnniversaryDropSection({ drop, products = [] }: FeaturedDropSect
             viewport={{ once: true }}
             className="order-1 lg:order-2 text-center lg:text-left"
           >
+            {/* Badge */}
             <div className="mb-6">
               <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/15 backdrop-blur-sm text-white caption">
-                ✿ {drop.badge_text || "featured drop"} ✿
+                🍊 2 years anniversary drop
               </span>
             </div>
 
-            <h2 className="headline-lg text-white mb-4">{dropName}</h2>
-            {dropTagline && (
-              <p className="headline-sm text-white/90 mb-3">{dropTagline}</p>
-            )}
+            {/* Title */}
+            <h2 className="headline-lg text-white mb-4">
+              to zoyme
+              <br />
+              raw
+            </h2>
 
-            <p className="body-md text-white/75 mb-8 max-w-lg mx-auto lg:mx-0">
-              {dropDescription}
+            <p className="body-lg text-white/80 mb-3 max-w-lg mx-auto lg:mx-0">
+              Γιορτάζουμε 2 χρόνια kati kandles με τη συλλογή Raw Portokali.
+            </p>
+            <p className="body-md text-white/65 mb-8 max-w-lg mx-auto lg:mx-0">
+              Χειροποίητο κερί σόγιας εμπνευσμένο από τους πορτοκαλεώνες
+              της Ελλάδας. Limited edition, φτιαγμένο με αγάπη.
             </p>
 
-            {featured && (
-              <div className="flex items-center gap-6 mb-8 justify-center lg:justify-start">
-                <div>
-                  <span className="caption text-[#ffc107]">τιμή</span>
-                  <p className="headline-sm text-white">
-                    {formatPrice(featured.sale_price ?? featured.price)}
-                  </p>
-                </div>
-                <div className="w-px h-10 bg-white/20" />
-                <div>
-                  <span className="caption text-[#ffc107]">edition</span>
-                  <p className="headline-sm text-white">limited</p>
-                </div>
+            {/* Product quick info */}
+            <div className="flex items-center gap-6 mb-8 justify-center lg:justify-start">
+              <div>
+                <span className="caption text-[#ffc107]">τιμή</span>
+                <p className="headline-sm text-white">€12.90</p>
               </div>
-            )}
+              <div className="w-px h-10 bg-white/20" />
+              <div>
+                <span className="caption text-[#ffc107]">edition</span>
+                <p className="headline-sm text-white">limited</p>
+              </div>
+              <div className="w-px h-10 bg-white/20" />
+              <div>
+                <span className="caption text-[#ffc107]">βάρος</span>
+                <p className="headline-sm text-white">150gr</p>
+              </div>
+            </div>
 
+            {/* CTA */}
             <div className="flex gap-3 flex-wrap justify-center lg:justify-start">
-              {featured && (
-                <Link
-                  href={`/products/${featured.slug}`}
-                  className="caption inline-block bg-white text-[#502e23] px-8 py-3.5 rounded-full hover:bg-white/90 transition-all hover:scale-105 font-medium uppercase tracking-wide shadow-lg"
-                >
-                  αγόρασε τώρα
-                </Link>
-              )}
               <Link
-                href="/products"
+                href="/products/raw-portokali"
+                className="caption inline-block bg-white text-[#FF7A00] px-8 py-3.5 rounded-full hover:bg-white/90 transition-all hover:scale-105 font-medium uppercase tracking-wide shadow-lg"
+              >
+                αγόρασε τώρα
+              </Link>
+              <Link
+                href="#candles"
                 className="caption inline-block border-2 border-white/30 text-white px-8 py-3.5 rounded-full hover:bg-white/10 transition-all hover:scale-105 font-medium uppercase tracking-wide"
               >
                 όλα τα κεριά
@@ -206,6 +224,7 @@ export function AnniversaryDropSection({ drop, products = [] }: FeaturedDropSect
         </div>
       </div>
 
+      {/* Bottom decorative wave / transition */}
       <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
     </section>
   )

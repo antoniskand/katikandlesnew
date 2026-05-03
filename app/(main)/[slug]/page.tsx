@@ -25,11 +25,8 @@ export async function generateMetadata({
     if (!page) return { title: "Page Not Found" }
 
     return {
-      title: page.name,
-      description:
-        page.meta_description ||
-        "Kati Kandles — Handmade, limited edition, soya-based vegan candles.",
-      alternates: { canonical: `/${page.slug}` },
+      title: `${page.name} | Kati Kandles`,
+      description: page.meta_description || "Kati Kandles - Handmade, limited edition, soya-based vegan candles",
     }
   } catch {
     return { title: "Kati Kandles" }
@@ -52,13 +49,10 @@ export default async function DynamicPage({
     if (!page) notFound()
 
     return (
-      <div className="w-full pt-28 md:pt-32 pb-16 bg-[#f7e7ce]">
-        <div className="container mx-auto px-4 max-w-3xl">
-          <h1 className="headline-md text-[#1a1a1a] mb-8">{page.name}</h1>
-          <div
-            className="prose prose-lg max-w-none text-[#502e23]/85 prose-headings:text-[#1a1a1a] prose-strong:text-[#1a1a1a] prose-a:text-[#ff6b35]"
-            dangerouslySetInnerHTML={{ __html: page.content || "" }}
-          />
+      <div className="w-full pt-32 pb-16">
+        <div className="container mx-auto px-4 max-w-4xl">
+          <h1 className="text-3xl font-bold mb-8">{page.name}</h1>
+          <div className="prose prose-lg max-w-none mb-16" dangerouslySetInnerHTML={{ __html: page.content || "" }} />
         </div>
       </div>
     )

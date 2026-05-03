@@ -112,8 +112,8 @@ export interface Order {
   coupon_id?: string
   payment_method: string
   payment_status: string
-  stripe_session_id?: string
-  stripe_payment_intent_id?: string
+  viva_order_code?: string
+  viva_transaction_id?: string
   notes?: string
   metadata: Record<string, unknown>
   items?: OrderItem[]
@@ -430,9 +430,8 @@ export async function createOrder(orderData: {
   grand_total: number
   coupon_code?: string
   coupon_id?: string
-  stripe_session_id?: string
-  stripe_payment_intent_id?: string
-  payment_method?: string
+  viva_order_code?: string
+  viva_transaction_id?: string
   payment_status?: string
   status?: string
   items: Array<{
@@ -509,13 +508,13 @@ export async function getOrder(id: string): Promise<Order | null> {
   return { ...order, items: items || [] } as Order
 }
 
-export async function getOrderByStripeSession(sessionId: string): Promise<Order | null> {
+export async function getOrderByVivaCode(vivaOrderCode: string): Promise<Order | null> {
   const supabase = getServerClient()
 
   const { data: order } = await supabase
     .from("orders")
     .select("*")
-    .eq("stripe_session_id", sessionId)
+    .eq("viva_order_code", vivaOrderCode)
     .single()
 
   if (!order) return null
@@ -526,6 +525,18 @@ export async function getOrderByStripeSession(sessionId: string): Promise<Order 
     .eq("order_id", order.id)
 
   return { ...order, items: items || [] } as Order
+}
+
+export async function getOrderByVivaTransaction(transactionId: string): Promise<Order | null> {
+  const supabase = getServerClient()
+
+  const { data } = await supabase
+    .from("orders")
+    .select("*")
+    .eq("viva_transaction_id", transactionId)
+    .single()
+
+  return data as Order | null
 }
 
 export async function updateOrderStatus(
@@ -604,75 +615,6 @@ export async function getPages(): Promise<Page[]> {
   const supabase = getServerClient()
   const { data } = await supabase.from("pages").select("*").order("name")
   return (data || []) as Page[]
-}
-
-// ─── DROPS ─────────────────────────────────────────
-
-export interface Drop {
-  id: string
-  name: string
-  slug: string
-  tagline?: string
-  description?: string
-  badge_text?: string
-  starts_at?: string
-  ends_at?: string
-  hero_image_url?: string
-  background_color?: string
-  active: boolean
-  featured: boolean
-  product_ids: string[]
-  sort_order: number
-  created_at: string
-  updated_at: string
-}
-
-export async function getFeaturedDrop(): Promise<{
-  drop: Drop | null
-  products: Product[]
-}> {
-  const supabase = getServerClient()
-
-  const now = new Date().toISOString()
-
-  const { data, error } = await supabase
-    .from("drops")
-    .select("*")
-    .eq("active", true)
-    .eq("featured", true)
-    .or(`starts_at.is.null,starts_at.lte.${now}`)
-    .or(`ends_at.is.null,ends_at.gte.${now}`)
-    .order("sort_order", { ascending: true })
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle()
-
-  if (error || !data) return { drop: null, products: [] }
-
-  const drop = data as Drop
-  let products: Product[] = []
-
-  if (drop.product_ids?.length) {
-    const { data: rows } = await supabase
-      .from("products")
-      .select("*, product_categories(category_id, categories(*)), product_variants(*)")
-      .in("id", drop.product_ids)
-      .eq("active", true)
-
-    products = (rows || []).map(transformProductRow)
-  }
-
-  return { drop, products }
-}
-
-export async function getDrops(): Promise<Drop[]> {
-  const supabase = getServerClient()
-  const { data } = await supabase
-    .from("drops")
-    .select("*")
-    .order("sort_order")
-    .order("created_at", { ascending: false })
-  return (data || []) as Drop[]
 }
 
 // ─── STOCK HELPERS ─────────────────────────────────

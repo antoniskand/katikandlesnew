@@ -1,27 +1,29 @@
+// app/api/orders/[id]/route.ts
 import { NextResponse } from "next/server"
 import { getOrder } from "@/lib/supabase-api"
 
 export const dynamic = "force-dynamic"
 
-interface Ctx {
-  params: Promise<{ id: string }>
-}
-
-export async function GET(_request: Request, { params }: Ctx) {
+export async function GET(request: Request, { params }: { params: { id: string } }) {
   try {
-    const { id } = await params
-    if (!id) {
-      return NextResponse.json({ error: "Order ID required" }, { status: 400 })
+    const { id: orderId } = params
+
+    if (!orderId) {
+      return NextResponse.json({ error: "Order ID is required" }, { status: 400 })
     }
-    const order = await getOrder(id)
+
+    const order = await getOrder(orderId)
+
     if (!order) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 })
     }
+
     return NextResponse.json(order)
   } catch (error) {
+    console.error("Error fetching order:", error)
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed" },
-      { status: 500 },
+      { error: `Failed to fetch order: ${error instanceof Error ? error.message : "Unknown"}` },
+      { status: 500 }
     )
   }
 }

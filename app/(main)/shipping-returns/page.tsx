@@ -7,19 +7,16 @@ export const metadata: Metadata = {
 
 export default function ShippingReturnsPage() {
   return (
-    <main className="bg-[#f7e7ce] pt-28 md:pt-32 pb-16">
-      <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-        <div className="caption text-[#502e23]/60 mb-3">policy</div>
-        <h1 className="headline-md text-[#1a1a1a] mb-10">Αποστολές & Επιστροφές</h1>
-        <div className="prose prose-lg max-w-none text-[#502e23]/85 prose-headings:text-[#1a1a1a] prose-strong:text-[#1a1a1a]">
+    <main className="container mx-auto px-4 py-12 max-w-4xl">
+      <h1 className="text-3xl font-bold mb-8 text-center">Πολιτική Ακύρωσης Παραγγελίας και Επιστροφής Προϊόντος</h1>
 
       <section className="mb-8">
-        <h2 className="text-2xl font-semibold mb-4 text-[#ff6b35]">Ακύρωση παραγγελίας:</h2>
+        <h2 className="text-2xl font-semibold mb-4 text-[#0093a6]">Ακύρωση παραγγελίας:</h2>
         <p className="mb-4">
           Η ακύρωση μιας παραγγελίας μπορεί να πραγματοποιηθεί εφόσον η παραγγελία δεν έχει εισέλθει ήδη στη διαδικασία
           διεκπεραίωσης και όχι αργότερα από 24 ώρες μετά την καταχώρησή της στο ηλεκτρονικό κατάστημα
           www.katikandles.gr. Η ακύρωση γίνεται κατόπιν επικοινωνίας μέσω email στη διεύθυνση{" "}
-          <a href="mailto:support@katikandles.gr" className="text-[#ff6b35] hover:underline">
+          <a href="mailto:support@katikandles.gr" className="text-[#0093a6] hover:underline">
             support@katikandles.gr
           </a>
           , με θέμα «Ακύρωση παραγγελίας» και αναφορά του αριθμού παραγγελίας.
@@ -31,7 +28,7 @@ export default function ShippingReturnsPage() {
       </section>
 
       <section className="mb-8">
-        <h2 className="text-2xl font-semibold mb-4 text-[#ff6b35]">Επιστροφή προϊόντος λόγω λάθους ή ελαττώματος:</h2>
+        <h2 className="text-2xl font-semibold mb-4 text-[#0093a6]">Επιστροφή προϊόντος λόγω λάθους ή ελαττώματος:</h2>
         <p className="mb-4">
           Σε περίπτωση παράδοσης λανθασμένου προϊόντος (λάθος είδος ή ποσότητα) ή προϊόντος με πραγματικό ελάττωμα ή
           έλλειψη συνομολογημένης ιδιότητας που περιγράφεται στον ιστότοπο, ο πελάτης έχει δικαίωμα να επιστρέψει το
@@ -40,7 +37,7 @@ export default function ShippingReturnsPage() {
         <p className="mb-4">
           Η ειδοποίηση σχετικά με την επιστροφή πρέπει να γίνει εντός είκοσι (20) ημερολογιακών ημερών από την παραλαβή
           του προϊόντος με αποστολή email στο{" "}
-          <a href="mailto:support@katikandles.gr" className="text-[#ff6b35] hover:underline">
+          <a href="mailto:support@katikandles.gr" className="text-[#0093a6] hover:underline">
             support@katikandles.gr
           </a>
           .
@@ -57,8 +54,6 @@ export default function ShippingReturnsPage() {
           χρησιμοποιηθεί ή αλλοιωθεί.
         </p>
       </section>
-      </div>
-      </div>
     </main>
   )
 }

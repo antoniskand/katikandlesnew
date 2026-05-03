@@ -7,12 +7,11 @@ export const metadata: Metadata = {
 
 export default function PrivacyPolicyPage() {
   return (
-    <div className="w-full pt-28 md:pt-32 pb-16 bg-[#f7e7ce]">
-      <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-        <div className="caption text-[#502e23]/60 mb-3">legal</div>
-        <h1 className="headline-md text-[#1a1a1a] mb-8">Πολιτική Απορρήτου</h1>
+    <div className="w-full pt-32 pb-16">
+      <div className="container mx-auto px-4 max-w-4xl">
+        <h1 className="text-3xl font-bold mb-8">Πολιτική Απορρήτου</h1>
 
-        <div className="prose prose-lg max-w-none text-[#502e23]/85 prose-headings:text-[#1a1a1a] prose-strong:text-[#1a1a1a] prose-a:text-[#ff6b35]">
+        <div className="prose prose-lg max-w-none mb-16">
           <p>
             Στην εταιρεία «ΚΑΝΔΥΛΑΚΗΣ ΑΝΤΩΝΙΟΣ & ΣΙΑ Ε.Ε.» η προστασία των προσωπικών σας δεδομένων αποτελεί απόλυτη
             προτεραιότητά μας, ώστε να εξασφαλίζεται η ασφαλής και άνετη περιήγησή σας στον ιστότοπό μας

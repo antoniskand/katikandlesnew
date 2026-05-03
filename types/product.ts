@@ -1,4 +1,5 @@
 // types/product.ts
+// Replaces types/swell.ts — universal e-commerce types (Swell-free)
 
 export interface ProductImage {
   url: string
@@ -47,7 +48,7 @@ export interface Category {
 }
 
 export interface CartItem {
-  id: string
+  id: string // client-generated ID
   product_id: string
   variant_id?: string
   product: {
@@ -105,8 +106,8 @@ export interface Order {
   coupon_code?: string
   payment_method: string
   payment_status: string
-  stripe_session_id?: string
-  stripe_payment_intent_id?: string
+  viva_order_code?: string
+  viva_transaction_id?: string
   notes?: string
   metadata: Record<string, unknown>
   items?: OrderItem[]
@@ -151,30 +152,12 @@ export interface Page {
   active: boolean
 }
 
-export interface Drop {
-  id: string
-  name: string
-  slug: string
-  tagline?: string
-  description?: string
-  badge_text?: string
-  starts_at?: string
-  ends_at?: string
-  hero_image_url?: string
-  background_color?: string
-  active: boolean
-  featured: boolean
-  product_ids: string[]
-  products?: Product[]
-  sort_order: number
-  created_at: string
-  updated_at: string
-}
+// Keep backward compatibility — re-export with old names where needed
+export type { ProductImage as SwellImage }
 
-export interface AdminUser {
-  id: string
-  email: string
-  role: "owner" | "admin" | "editor"
-  display_name?: string
-  created_at: string
+export interface SwellListResponse<T> {
+  results: T[]
+  count: number
+  page?: number
+  pages?: number
 }
