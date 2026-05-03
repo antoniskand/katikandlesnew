@@ -686,30 +686,48 @@ export async function getFeaturedDrop(): Promise<{
   drop: Drop | null
   products: Product[]
 }> {
+  const all = await getFeaturedDrops()
+  return all[0] ?? { drop: null, products: [] }
+}
+
+// Returns every active+featured drop within its scheduled window, sorted by
+// sort_order then most-recent. Used by the home page so an editor can have
+// multiple drops live at once (e.g., a holiday drop above the anniversary).
+export async function getFeaturedDrops(): Promise<
+  Array<{ drop: Drop; products: Product[] }>
+> {
   const now = new Date()
-  const row = await db.query.drops.findFirst({
-    where: and(
-      eq(drops.active, true),
-      eq(drops.featured, true),
-      or(sql`${drops.startsAt} IS NULL`, lte(drops.startsAt, now))!,
-      or(sql`${drops.endsAt} IS NULL`, gte(drops.endsAt, now))!,
-    ),
-    orderBy: [asc(drops.sortOrder), desc(drops.createdAt)],
-  })
+  const rows = await db
+    .select()
+    .from(drops)
+    .where(
+      and(
+        eq(drops.active, true),
+        eq(drops.featured, true),
+        or(sql`${drops.startsAt} IS NULL`, lte(drops.startsAt, now))!,
+        or(sql`${drops.endsAt} IS NULL`, gte(drops.endsAt, now))!,
+      ),
+    )
+    .orderBy(asc(drops.sortOrder), desc(drops.createdAt))
 
-  if (!row) return { drop: null, products: [] }
-
-  const drop = toDrop(row)
-  let productList: Product[] = []
-  if (drop.product_ids.length > 0) {
-    const rows = await db
-      .select()
-      .from(products)
-      .where(and(inArray(products.id, drop.product_ids), eq(products.active, true)))
-    productList = await Promise.all(rows.map((r) => loadProductRelations(r)))
+  const result: Array<{ drop: Drop; products: Product[] }> = []
+  for (const row of rows) {
+    const drop = toDrop(row)
+    let productList: Product[] = []
+    if (drop.product_ids.length > 0) {
+      const productRows = await db
+        .select()
+        .from(products)
+        .where(
+          and(inArray(products.id, drop.product_ids), eq(products.active, true)),
+        )
+      productList = await Promise.all(
+        productRows.map((r) => loadProductRelations(r)),
+      )
+    }
+    result.push({ drop, products: productList })
   }
-
-  return { drop, products: productList }
+  return result
 }
 
 export async function getDrops(): Promise<Drop[]> {

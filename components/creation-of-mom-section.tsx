@@ -3,19 +3,34 @@
 import Link from "next/link"
 import Image from "next/image"
 import { motion } from "framer-motion"
+import type { Drop, Product } from "@/types/product"
+import { formatPrice } from "@/lib/utils"
 
 // Mother's Day "Creation of Mom" drop. Mirrors the AnniversaryDropSection
 // language: solid color panel, massive background word, rotating decorative
-// SVGs, centered hero stamp, side text column. Visuals pulled from Kati
-// Kandles' Mother's Day asset pack — see public/drops/creation-of-mom/.
+// SVGs, centered hero stamp, side text column.
+//
+// Content (name, tagline, description, badge, hero image, bg color, products)
+// comes from the matching drops row in the database — manage it from
+// /admin/drops. The decorative SVG pack is brand art tied to this drop's
+// slug and lives in public/drops/creation-of-mom/.
 
-const BG = "#F5DAD2" // cream/peach — matches the stamp's background
+interface Props {
+  drop?: Drop | null
+  products?: Product[]
+}
 
-export function CreationOfMomSection() {
+export function CreationOfMomSection({ drop, products = [] }: Props) {
+  if (!drop) return null
+
+  const bg = drop.background_color || "#F5DAD2"
+  const featured = products[0]
+  const heroSrc = drop.hero_image_url || "/drops/creation-of-mom/hero.png"
+
   return (
     <section
       className="relative py-24 md:py-36 overflow-hidden z-10"
-      style={{ backgroundColor: BG }}
+      style={{ backgroundColor: bg }}
       id="creation-of-mom"
     >
       {/* Floating decorative botanicals */}
@@ -65,7 +80,7 @@ export function CreationOfMomSection() {
             className="text-[28vw] md:text-[22vw] font-light tracking-tighter whitespace-nowrap leading-none"
             style={{ color: "#C84A4A", opacity: 0.08 }}
           >
-            for mom
+            {drop.slug || "for mom"}
           </h2>
         </motion.div>
       </div>
@@ -82,8 +97,8 @@ export function CreationOfMomSection() {
           >
             <div className="relative w-72 h-72 md:w-96 md:h-96 lg:w-[28rem] lg:h-[28rem]">
               <Image
-                src="/drops/creation-of-mom/hero.png"
-                alt="Creation of Mom — Kati Kandles"
+                src={heroSrc}
+                alt={drop.name}
                 fill
                 className="object-contain drop-shadow-[0_30px_40px_rgba(0,0,0,0.18)]"
                 sizes="(max-width: 768px) 288px, (max-width: 1024px) 384px, 448px"
@@ -100,65 +115,78 @@ export function CreationOfMomSection() {
             viewport={{ once: true }}
             className="order-1 lg:order-2 text-center lg:text-left"
           >
-            <div className="mb-6">
-              <span
-                className="inline-flex items-center gap-2 px-4 py-2 backdrop-blur-sm caption"
-                style={{
-                  backgroundColor: "rgba(200, 74, 74, 0.12)",
-                  color: "#8A2A2A",
-                }}
-              >
-                ✿ mother&apos;s day drop ✿
-              </span>
-            </div>
+            {drop.badge_text && (
+              <div className="mb-6">
+                <span
+                  className="inline-flex items-center gap-2 px-4 py-2 backdrop-blur-sm caption"
+                  style={{
+                    backgroundColor: "rgba(200, 74, 74, 0.12)",
+                    color: "#8A2A2A",
+                  }}
+                >
+                  ✿ {drop.badge_text} ✿
+                </span>
+              </div>
+            )}
 
             <h2 className="headline-lg mb-4" style={{ color: "#1a1a1a" }}>
-              creation of mom
+              {drop.name}
             </h2>
-            <p className="headline-sm mb-3" style={{ color: "#8A2A2A" }}>
-              για όλες τις μαμάδες
-            </p>
+            {drop.tagline && (
+              <p className="headline-sm mb-3" style={{ color: "#8A2A2A" }}>
+                {drop.tagline}
+              </p>
+            )}
 
-            <p
-              className="body-md mb-8 max-w-lg mx-auto lg:mx-0"
-              style={{ color: "rgba(26, 26, 26, 0.72)" }}
-            >
-              Limited edition συλλογή για τη Γιορτή της Μητέρας — εμπνευσμένη
-              από το άγγιγμα που μας έφερε στον κόσμο. Χειροποίητα κεριά
-              σόγιας, φτιαγμένα με αγάπη για την πρώτη μας αγάπη.
-            </p>
+            {drop.description && (
+              <p
+                className="body-md mb-8 max-w-lg mx-auto lg:mx-0"
+                style={{ color: "rgba(26, 26, 26, 0.72)" }}
+              >
+                {drop.description}
+              </p>
+            )}
 
-            <div className="flex items-center gap-6 mb-10 justify-center lg:justify-start">
-              <div>
-                <span className="caption" style={{ color: "#8A2A2A" }}>
-                  edition
-                </span>
-                <p className="headline-sm" style={{ color: "#1a1a1a" }}>
-                  limited
-                </p>
+            {featured && (
+              <div className="flex items-center gap-6 mb-10 justify-center lg:justify-start">
+                <div>
+                  <span className="caption" style={{ color: "#8A2A2A" }}>
+                    τιμή
+                  </span>
+                  <p className="headline-sm" style={{ color: "#1a1a1a" }}>
+                    {formatPrice(featured.sale_price ?? featured.price)}
+                  </p>
+                </div>
+                <div className="w-px h-10" style={{ backgroundColor: "rgba(26,26,26,0.15)" }} />
+                <div>
+                  <span className="caption" style={{ color: "#8A2A2A" }}>
+                    edition
+                  </span>
+                  <p className="headline-sm" style={{ color: "#1a1a1a" }}>
+                    limited
+                  </p>
+                </div>
               </div>
-              <div className="w-px h-10" style={{ backgroundColor: "rgba(26,26,26,0.15)" }} />
-              <div>
-                <span className="caption" style={{ color: "#8A2A2A" }}>
-                  drops
-                </span>
-                <p className="headline-sm" style={{ color: "#1a1a1a" }}>
-                  μάιος
-                </p>
-              </div>
-            </div>
+            )}
 
             <div className="flex gap-3 flex-wrap justify-center lg:justify-start">
-              <Link
-                href="/products"
-                className="caption inline-block px-8 py-3.5 hover:opacity-90 transition-opacity font-medium uppercase tracking-wide"
-                style={{
-                  backgroundColor: "#1a1a1a",
-                  color: "#ffffff",
-                }}
-              >
-                δες τη συλλογή
-              </Link>
+              {featured ? (
+                <Link
+                  href={`/products/${featured.slug}`}
+                  className="caption inline-block px-8 py-3.5 hover:opacity-90 transition-opacity font-medium uppercase tracking-wide"
+                  style={{ backgroundColor: "#1a1a1a", color: "#ffffff" }}
+                >
+                  αγόρασε τώρα
+                </Link>
+              ) : (
+                <Link
+                  href="/products"
+                  className="caption inline-block px-8 py-3.5 hover:opacity-90 transition-opacity font-medium uppercase tracking-wide"
+                  style={{ backgroundColor: "#1a1a1a", color: "#ffffff" }}
+                >
+                  δες τη συλλογή
+                </Link>
+              )}
               <Link
                 href="/products"
                 className="caption inline-block px-8 py-3.5 transition-colors font-medium uppercase tracking-wide border"
