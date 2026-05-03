@@ -132,19 +132,29 @@ function CategorySection({
                 </Link>
 
                 <motion.div
-                  whileHover={{ scale: 1.05 }}
+                  whileHover={{ scale: 1.04 }}
                   transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
                   className="w-40 h-40 md:w-48 md:h-48 relative flex-shrink-0"
                 >
-                  <Link href={`/products/${product.slug}`}>
-                    <Image
-                      src={getProductImage(product)}
-                      alt={product.name}
-                      fill
-                      loading="lazy"
-                      className="object-contain drop-shadow-lg"
-                      sizes="(max-width: 768px) 160px, 192px"
-                    />
+                  <Link
+                    href={`/products/${product.slug}`}
+                    className={`relative block w-full h-full overflow-hidden ${
+                      isLightBg ? "bg-[#1a1a1a]/[0.04]" : "bg-white/10"
+                    }`}
+                  >
+                    {/* Image is inset with uniform padding so each product
+                        renders at the same visible size, regardless of how
+                        much padding the source PNG already has. */}
+                    <div className="absolute inset-6 md:inset-7">
+                      <Image
+                        src={getProductImage(product)}
+                        alt={product.name}
+                        fill
+                        loading="lazy"
+                        className="object-contain drop-shadow-[0_12px_18px_rgba(0,0,0,0.18)]"
+                        sizes="(max-width: 768px) 160px, 192px"
+                      />
+                    </div>
                   </Link>
                 </motion.div>
               </motion.div>
