@@ -182,7 +182,7 @@ export function EditorialProductView({ product }: EditorialProductViewProps) {
               )}
 
               {/* Name */}
-              <h1 className="headline-lg text-[#1a1a1a] mb-8 break-words">
+              <h1 className="font-light text-[#1a1a1a] mb-8 break-words tracking-tight leading-[1.05] text-3xl md:text-4xl lg:text-5xl lowercase">
                 {product.name}
               </h1>
 
