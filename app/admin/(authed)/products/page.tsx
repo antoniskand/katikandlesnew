@@ -25,68 +25,67 @@ export default async function ProductsAdmin() {
         }
       />
 
-      <div
-        className="bg-white border-2 border-[#1a1a1a] rounded-3xl overflow-hidden"
-        style={{ boxShadow: "0 12px 28px -16px rgba(26, 18, 8, 0.25)" }}
-      >
+      <div className="border-t border-[#1a1a1a]/12">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
-            <thead className="bg-[#f7e7ce] border-b-2 border-[#1a1a1a]/10">
-              <tr className="text-left text-[#502e23]/70 uppercase text-[10px] tracking-wider">
-                <th className="px-4 py-3"></th>
-                <th className="px-4 py-3">όνομα</th>
-                <th className="px-4 py-3">τιμή</th>
-                <th className="px-4 py-3">stock</th>
-                <th className="px-4 py-3">status</th>
-                <th className="px-4 py-3"></th>
+            <thead>
+              <tr className="text-left text-[10px] tracking-[0.18em] uppercase text-[#1a1a1a]/45 border-b border-[#1a1a1a]/12">
+                <th className="px-3 py-3 font-normal"></th>
+                <th className="px-3 py-3 font-normal">όνομα</th>
+                <th className="px-3 py-3 font-normal">τιμή</th>
+                <th className="px-3 py-3 font-normal">stock</th>
+                <th className="px-3 py-3 font-normal">status</th>
+                <th className="px-3 py-3 font-normal"></th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#1a1a1a]/5">
+            <tbody className="divide-y divide-[#1a1a1a]/8">
               {rows.map((p) => {
                 const imgs = p.images as { url?: string }[] | undefined
                 const img = Array.isArray(imgs) && imgs.length > 0 ? imgs[0]?.url : null
                 return (
-                  <tr key={p.id} className="hover:bg-[#f7e7ce]/50">
-                    <td className="px-4 py-3">
-                      <div className="relative w-12 h-12 rounded-xl bg-[#f7e7ce] overflow-hidden">
+                  <tr key={p.id} className="hover:bg-[#1a1a1a]/[0.02]">
+                    <td className="px-3 py-3">
+                      <div className="relative w-12 h-12 bg-[#f4eee2] overflow-hidden">
                         {img && (
                           <Image src={img} alt={p.name} fill sizes="48px" className="object-cover" />
                         )}
                       </div>
                     </td>
-                    <td className="px-4 py-3">
-                      <p className="font-medium text-[#1a1a1a]">{p.name}</p>
-                      <p className="text-xs text-[#502e23]/70">/{p.slug}</p>
+                    <td className="px-3 py-3">
+                      <p className="text-[#1a1a1a]">{p.name}</p>
+                      <p className="text-xs text-[#1a1a1a]/50 mt-0.5">/{p.slug}</p>
                     </td>
-                    <td className="px-4 py-3 font-medium">
+                    <td className="px-3 py-3 tabular-nums text-[#1a1a1a]">
                       {p.salePrice ? (
                         <>
-                          <span className="text-[#ff6b35]">{formatPrice(Number(p.salePrice))}</span>
-                          <span className="ml-2 text-xs line-through text-[#502e23]/70">{formatPrice(Number(p.price))}</span>
+                          <span>{formatPrice(Number(p.salePrice))}</span>
+                          <span className="ml-2 text-xs line-through text-[#1a1a1a]/40">
+                            {formatPrice(Number(p.price))}
+                          </span>
                         </>
                       ) : (
                         formatPrice(Number(p.price))
                       )}
                     </td>
-                    <td className="px-4 py-3 text-[#502e23]/70">{p.stockLevel ?? "—"}</td>
-                    <td className="px-4 py-3">
-                      <span
-                        className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full ${
-                          p.active
-                            ? "bg-[#0f9b81]/15 text-[#0f9b81]"
-                            : "bg-[#1a1a1a]/10 text-[#502e23]/70"
-                        }`}
-                      >
-                        {p.active ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
+                    <td className="px-3 py-3 tabular-nums text-[#1a1a1a]/70">
+                      {p.stockLevel ?? "—"}
+                    </td>
+                    <td className="px-3 py-3">
+                      <span className="inline-flex items-center gap-2 text-[10px] tracking-[0.14em] uppercase text-[#1a1a1a]/70">
+                        <span
+                          className={`h-1.5 w-1.5 rounded-full ${
+                            p.active ? "bg-[#0f9b81]" : "bg-[#1a1a1a]/30"
+                          }`}
+                        />
                         {p.active ? "ενεργό" : "ανενεργό"}
                       </span>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-3 py-3">
                       <Link
                         href={`/admin/products/${p.id}`}
-                        className="inline-flex items-center gap-1 text-[#ff6b35] hover:underline text-sm font-medium"
+                        className="inline-flex items-center gap-1.5 text-xs tracking-[0.12em] uppercase text-[#1a1a1a]/70 hover:text-[#1a1a1a] border-b border-[#1a1a1a]/20 hover:border-[#1a1a1a] pb-0.5 transition-colors"
                       >
-                        <Edit className="h-3.5 w-3.5" /> edit
+                        <Edit className="h-3 w-3" /> edit
                       </Link>
                     </td>
                   </tr>
@@ -96,7 +95,7 @@ export default async function ProductsAdmin() {
           </table>
 
           {rows.length === 0 && (
-            <div className="text-center text-[#502e23]/70 py-16">
+            <div className="text-center text-[#1a1a1a]/55 py-16">
               Δεν υπάρχουν προϊόντα. Πρόσθεσε το πρώτο σου.
             </div>
           )}

@@ -231,22 +231,26 @@ html {
   letter-spacing: -0.01em;
 }
 
+/* Editorial admin chrome — flat hairline language, no rounded pills,
+   no orange accents. */
+
 .kk-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.6rem 1.25rem;
-  border-radius: 9999px;
-  font-size: 0.875rem;
+  height: 2.75rem;
+  padding: 0 1.25rem;
+  border-radius: 0;
+  font-size: 0.75rem;
   font-weight: 500;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   border: 1px solid transparent;
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.18s ease;
+  transition: background-color 0.18s ease, border-color 0.18s ease, color 0.18s ease, opacity 0.18s ease;
   white-space: nowrap;
   cursor: pointer;
 }
-.kk-btn:active { transform: translateY(1px); }
 
 .kk-btn-primary {
   background: #1a1a1a;
@@ -254,49 +258,63 @@ html {
   border-color: #1a1a1a;
 }
 .kk-btn-primary:hover {
-  background: #ff6b35;
-  border-color: #ff6b35;
+  background: rgba(26, 26, 26, 0.85);
+  border-color: rgba(26, 26, 26, 0.85);
 }
 
 .kk-btn-secondary {
-  background: white;
+  background: transparent;
   color: #1a1a1a;
-  border-color: rgba(26, 26, 26, 0.18);
+  border-color: rgba(26, 26, 26, 0.20);
 }
 .kk-btn-secondary:hover {
-  background: #f7e7ce;
-  border-color: rgba(26, 26, 26, 0.4);
+  border-color: #1a1a1a;
 }
 
 .kk-input {
   width: 100%;
-  padding: 0.6rem 0.9rem;
-  border-radius: 0.5rem;
-  border: 1px solid rgba(26, 26, 26, 0.18);
-  background: white;
-  font-size: 0.875rem;
-  transition: box-shadow 0.18s ease, border-color 0.18s ease;
+  padding: 0.55rem 0;
+  border-radius: 0;
+  border: 0;
+  border-bottom: 1px solid rgba(26, 26, 26, 0.20);
+  background: transparent;
+  font-size: 0.95rem;
+  color: #1a1a1a;
+  transition: border-color 0.18s ease;
 }
+.kk-input::placeholder { color: rgba(26, 26, 26, 0.30); }
 .kk-input:focus {
   outline: none;
-  border-color: #ff6b35;
-  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.15);
+  border-bottom-color: #1a1a1a;
 }
-.kk-textarea { border-radius: 0.75rem; }
+.kk-textarea {
+  border: 1px solid rgba(26, 26, 26, 0.20);
+  padding: 0.7rem 0.9rem;
+  border-radius: 0;
+  resize: vertical;
+}
+.kk-textarea:focus {
+  border-bottom-color: rgba(26, 26, 26, 0.20);
+  border-color: #1a1a1a;
+}
 
 .kk-tag {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 0;
+  font-size: 0.7rem;
   font-weight: 500;
-  border: 1px solid rgba(26, 26, 26, 0.15);
-  background: white;
-  color: #502e23;
-  transition: all 0.15s ease;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: 1px solid rgba(26, 26, 26, 0.18);
+  background: transparent;
+  color: #1a1a1a;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+  cursor: pointer;
 }
+.kk-tag:hover { border-color: #1a1a1a; }
 @keyframes float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-18px); }

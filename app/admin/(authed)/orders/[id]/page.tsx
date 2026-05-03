@@ -33,99 +33,119 @@ export default async function OrderDetailPage({ params }: PageProps) {
         actions={<StatusBadge status={order.status} />}
       />
 
-      <div className="grid lg:grid-cols-3 gap-6 max-w-6xl">
-        <div className="lg:col-span-2 space-y-5">
-          <Card title="Προϊόντα">
-            <div className="divide-y divide-[#1a1a1a]/5">
+      <div className="grid lg:grid-cols-3 gap-10 max-w-6xl">
+        <div className="lg:col-span-2 space-y-12">
+          <Card title="προϊόντα">
+            <div className="border-t border-[#1a1a1a]/12 divide-y divide-[#1a1a1a]/8">
               {items.map((item) => (
-                <div key={item.id} className="flex items-center gap-4 py-3">
-                  <div className="relative w-14 h-14 rounded-xl bg-[#f7e7ce] overflow-hidden">
+                <div key={item.id} className="flex items-center gap-4 py-4">
+                  <div className="relative w-12 h-12 bg-[#f4eee2] overflow-hidden flex-shrink-0">
                     {item.productImageUrl && (
                       <Image
                         src={item.productImageUrl}
                         alt={item.productName}
                         fill
-                        sizes="56px"
-                        className="object-cover"
+                        sizes="48px"
+                        className="object-contain p-1"
                       />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-medium text-[#1a1a1a]">{item.productName}</p>
-                    <p className="text-sm text-[#502e23]/70">
-                      {formatPrice(Number(item.price))} × {item.quantity}
+                    <p className="text-[#1a1a1a]">{item.productName}</p>
+                    <p className="text-[10px] tracking-[0.12em] uppercase text-[#1a1a1a]/55 mt-1 tabular-nums">
+                      {formatPrice(Number(item.price))} · {item.quantity}
                     </p>
                   </div>
-                  <span className="font-bold">{formatPrice(Number(item.lineTotal))}</span>
+                  <span className="text-[#1a1a1a] tabular-nums">
+                    {formatPrice(Number(item.lineTotal))}
+                  </span>
                 </div>
               ))}
             </div>
 
-            <div className="mt-4 pt-4 border-t border-[#1a1a1a]/10 space-y-2 text-sm">
+            <div className="mt-6 pt-5 border-t border-[#1a1a1a]/12 space-y-2 text-sm">
               <Row label="υποσύνολο" value={formatPrice(Number(order.subtotal))} />
               {Number(order.discountTotal) > 0 && (
                 <Row
                   label={`έκπτωση ${order.couponCode || ""}`}
-                  value={`-${formatPrice(Number(order.discountTotal))}`}
+                  value={`−${formatPrice(Number(order.discountTotal))}`}
                 />
               )}
               <Row label="μεταφορικά" value={formatPrice(Number(order.shippingTotal))} />
-              <Row label="σύνολο" value={formatPrice(Number(order.grandTotal))} bold />
+              <div className="pt-4 mt-2 border-t border-[#1a1a1a] flex items-baseline justify-between">
+                <span className="text-[11px] tracking-[0.22em] uppercase text-[#1a1a1a]/50">
+                  σύνολο
+                </span>
+                <span className="font-light text-[#1a1a1a] text-3xl tabular-nums tracking-tight leading-none">
+                  {formatPrice(Number(order.grandTotal))}
+                </span>
+              </div>
             </div>
           </Card>
 
-          <Card title="Αποστολή">
-            <p className="font-medium text-[#1a1a1a]">
+          <Card title="αποστολή">
+            <p className="text-[#1a1a1a]">
               {order.customerFirstName} {order.customerLastName}
             </p>
-            <p className="text-[#502e23]/70 text-sm">{order.shippingAddress1}</p>
+            <p className="text-[#1a1a1a]/65 text-sm">{order.shippingAddress1}</p>
             {order.shippingAddress2 && (
-              <p className="text-[#502e23]/70 text-sm">{order.shippingAddress2}</p>
+              <p className="text-[#1a1a1a]/65 text-sm">{order.shippingAddress2}</p>
             )}
-            <p className="text-[#502e23]/70 text-sm">
+            <p className="text-[#1a1a1a]/65 text-sm">
               {order.shippingCity}, {order.shippingZip}
             </p>
-            <p className="text-[#502e23]/70 text-sm">{order.shippingCountry}</p>
-            <p className="text-[#502e23]/70 text-sm mt-3">
-              <strong className="text-[#1a1a1a]">Μέθοδος:</strong>{" "}
+            <p className="text-[#1a1a1a]/65 text-sm">{order.shippingCountry}</p>
+            <p className="text-[#1a1a1a]/65 text-sm mt-4">
+              <span className="text-[10px] tracking-[0.18em] uppercase text-[#1a1a1a]/50 mr-2">
+                μέθοδος
+              </span>
               {order.shippingMethodName || order.shippingMethod}
             </p>
           </Card>
         </div>
 
-        <div className="space-y-5">
-          <Card title="Πελάτης">
-            <p className="font-medium">
+        <div className="space-y-12">
+          <Card title="πελάτης">
+            <p className="text-[#1a1a1a]">
               {order.customerFirstName} {order.customerLastName}
             </p>
-            <p className="text-sm">
+            <p className="text-sm mt-1">
               <a
                 href={`mailto:${order.customerEmail}`}
-                className="text-[#ff6b35] hover:underline"
+                className="text-[#1a1a1a] underline underline-offset-4"
               >
                 {order.customerEmail}
               </a>
             </p>
-            <p className="text-sm">
-              <a href={`tel:${order.customerPhone}`} className="text-[#ff6b35] hover:underline">
+            <p className="text-sm mt-1">
+              <a
+                href={`tel:${order.customerPhone}`}
+                className="text-[#1a1a1a] underline underline-offset-4"
+              >
                 {order.customerPhone}
               </a>
             </p>
           </Card>
 
-          <Card title="Πληρωμή">
-            <p className="text-sm">
-              <strong>Μέθοδος:</strong> {order.paymentMethod || "—"}
-            </p>
-            <p className="text-sm">
-              <strong>Status:</strong> {order.paymentStatus}
-            </p>
+          <Card title="πληρωμή">
+            <dl className="space-y-2 text-sm">
+              <div className="flex justify-between gap-3">
+                <dt className="text-[10px] tracking-[0.18em] uppercase text-[#1a1a1a]/50">μέθοδος</dt>
+                <dd className="text-[#1a1a1a]">{order.paymentMethod || "—"}</dd>
+              </div>
+              <div className="flex justify-between gap-3">
+                <dt className="text-[10px] tracking-[0.18em] uppercase text-[#1a1a1a]/50">status</dt>
+                <dd className="text-[#1a1a1a]">{order.paymentStatus}</dd>
+              </div>
+            </dl>
             {order.stripeSessionId && (
-              <p className="text-xs text-[#502e23]/70 mt-2 break-all">{order.stripeSessionId}</p>
+              <p className="text-[10px] text-[#1a1a1a]/45 mt-3 break-all tabular-nums">
+                {order.stripeSessionId}
+              </p>
             )}
           </Card>
 
-          <Card title="Status">
+          <Card title="status">
             <OrderStatusForm orderId={order.id} currentStatus={order.status} />
           </Card>
         </div>
@@ -136,25 +156,20 @@ export default async function OrderDetailPage({ params }: PageProps) {
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div
-      className="bg-white border-2 border-[#1a1a1a] rounded-3xl p-5"
-      style={{ boxShadow: "0 12px 28px -16px rgba(26, 18, 8, 0.25)" }}
-    >
-      <h3 className="font-heading font-bold text-lg mb-4">{title}</h3>
+    <div>
+      <h3 className="text-[11px] tracking-[0.22em] uppercase text-[#1a1a1a]/50 mb-4">
+        {title}
+      </h3>
       {children}
     </div>
   )
 }
 
-function Row({ label, value, bold }: { label: string; value: string; bold?: boolean }) {
+function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div
-      className={`flex justify-between ${
-        bold ? "font-bold text-base pt-2 border-t border-[#1a1a1a]/10" : ""
-      }`}
-    >
-      <span className={bold ? "text-[#1a1a1a]" : "text-[#502e23]/70"}>{label}</span>
-      <span className="text-[#1a1a1a]">{value}</span>
+    <div className="flex items-baseline justify-between gap-4">
+      <span className="text-[#1a1a1a]/65">{label}</span>
+      <span className="text-[#1a1a1a] tabular-nums">{value}</span>
     </div>
   )
 }

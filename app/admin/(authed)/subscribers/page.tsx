@@ -28,36 +28,32 @@ export default async function SubscribersAdmin() {
         }
       />
 
-      <div
-        className="bg-white border-2 border-[#1a1a1a] rounded-3xl overflow-hidden"
-        style={{ boxShadow: "0 12px 28px -16px rgba(26, 18, 8, 0.25)" }}
-      >
+      <div className="border-t border-[#1a1a1a]/12 overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="bg-[#f7e7ce] border-b-2 border-[#1a1a1a]/10">
-            <tr className="text-left text-[#502e23]/70 uppercase text-[10px] tracking-wider">
-              <th className="px-4 py-3">email</th>
-              <th className="px-4 py-3">status</th>
-              <th className="px-4 py-3">source</th>
-              <th className="px-4 py-3">date</th>
+          <thead>
+            <tr className="text-left text-[10px] tracking-[0.18em] uppercase text-[#1a1a1a]/45 border-b border-[#1a1a1a]/12">
+              <th className="px-3 py-3 font-normal">email</th>
+              <th className="px-3 py-3 font-normal">status</th>
+              <th className="px-3 py-3 font-normal">source</th>
+              <th className="px-3 py-3 font-normal">date</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#1a1a1a]/5">
+          <tbody className="divide-y divide-[#1a1a1a]/8">
             {subs.map((s) => (
-              <tr key={s.id} className="hover:bg-[#f7e7ce]/50">
-                <td className="px-4 py-3 font-medium">{s.email}</td>
-                <td className="px-4 py-3">
-                  <span
-                    className={`text-xs font-medium px-2 py-1 rounded-full ${
-                      s.status === "active"
-                        ? "bg-[#0f9b81]/15 text-[#0f9b81]"
-                        : "bg-[#1a1a1a]/10 text-[#502e23]/70"
-                    }`}
-                  >
+              <tr key={s.id} className="hover:bg-[#1a1a1a]/[0.02]">
+                <td className="px-3 py-3 text-[#1a1a1a]">{s.email}</td>
+                <td className="px-3 py-3">
+                  <span className="inline-flex items-center gap-2 text-[10px] tracking-[0.14em] uppercase text-[#1a1a1a]/70">
+                    <span
+                      className={`h-1.5 w-1.5 rounded-full ${
+                        s.status === "active" ? "bg-[#0f9b81]" : "bg-[#1a1a1a]/30"
+                      }`}
+                    />
                     {s.status}
                   </span>
                 </td>
-                <td className="px-4 py-3 text-[#502e23]/70">{s.source || "—"}</td>
-                <td className="px-4 py-3 text-[#502e23]/70">
+                <td className="px-3 py-3 text-[#1a1a1a]/55">{s.source || "—"}</td>
+                <td className="px-3 py-3 text-[#1a1a1a]/55 tabular-nums">
                   {s.subscribedAt instanceof Date
                     ? s.subscribedAt.toLocaleDateString("el-GR")
                     : ""}
@@ -67,7 +63,7 @@ export default async function SubscribersAdmin() {
           </tbody>
         </table>
         {subs.length === 0 && (
-          <p className="text-center text-[#502e23]/70 py-12">Καμία εγγραφή.</p>
+          <p className="text-center text-[#1a1a1a]/55 py-12">Καμία εγγραφή.</p>
         )}
       </div>
     </div>

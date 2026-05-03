@@ -25,46 +25,46 @@ export default async function DropsAdmin() {
         }
       />
 
-      <div className="grid gap-4">
+      <div className="border-t border-[#1a1a1a]/12">
         {rows.map((d) => {
           const productIds = Array.isArray(d.productIds) ? (d.productIds as string[]) : []
           return (
             <Link
               key={d.id}
               href={`/admin/drops/${d.id}`}
-              className="bg-white border-2 border-[#1a1a1a] rounded-3xl p-5 flex items-center gap-4 hover:translate-x-[-2px] hover:translate-y-[-2px] transition-transform"
-              style={{ boxShadow: "0 12px 28px -16px rgba(26, 18, 8, 0.25)" }}
+              className="grid grid-cols-[3.5rem_1fr_auto] gap-4 items-center py-5 border-b border-[#1a1a1a]/12 hover:bg-[#1a1a1a]/[0.02] px-2 -mx-2 transition-colors"
             >
               <div
-                className="w-14 h-14 rounded-2xl border-2 border-[#1a1a1a]"
-                style={{ background: d.backgroundColor || "#ff5a36" }}
+                className="w-14 h-14 border border-[#1a1a1a]/15"
+                style={{ background: d.backgroundColor || "#1a1a1a" }}
               />
-              <div className="flex-1 min-w-0">
+              <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <h3 className="font-heading font-bold text-lg truncate">{d.name}</h3>
-                  {d.featured && <Star className="h-4 w-4 fill-[#ffc107] text-[#ffc107]" />}
+                  <h3 className="text-lg tracking-tight text-[#1a1a1a] truncate">{d.name}</h3>
+                  {d.featured && <Star className="h-3.5 w-3.5 fill-[#1a1a1a] text-[#1a1a1a]" />}
                 </div>
-                <p className="text-sm text-[#502e23]/70">/{d.slug}</p>
+                <p className="text-xs text-[#1a1a1a]/50 mt-0.5">/{d.slug}</p>
               </div>
-              <div className="flex items-center gap-3 text-xs">
-                <span
-                  className={`px-2 py-1 rounded-full font-medium ${
-                    d.active
-                      ? "bg-[#0f9b81]/15 text-[#0f9b81]"
-                      : "bg-[#1a1a1a]/10 text-[#502e23]/70"
-                  }`}
-                >
+              <div className="flex items-center gap-5 text-xs">
+                <span className="inline-flex items-center gap-2 text-[10px] tracking-[0.14em] uppercase text-[#1a1a1a]/70">
+                  <span
+                    className={`h-1.5 w-1.5 rounded-full ${
+                      d.active ? "bg-[#0f9b81]" : "bg-[#1a1a1a]/30"
+                    }`}
+                  />
                   {d.active ? "ενεργό" : "ανενεργό"}
                 </span>
-                <span className="text-[#502e23]/70">{productIds.length} προϊόντα</span>
-                <Edit className="h-4 w-4 text-[#502e23]/70" />
+                <span className="text-[#1a1a1a]/55 tabular-nums">
+                  {productIds.length} προϊόντα
+                </span>
+                <Edit className="h-3.5 w-3.5 text-[#1a1a1a]/40" />
               </div>
             </Link>
           )
         })}
 
         {rows.length === 0 && (
-          <div className="text-center text-[#502e23]/70 py-16 bg-white rounded-3xl border-2 border-dashed border-[#1a1a1a]/20">
+          <div className="text-center text-[#1a1a1a]/55 py-16">
             Δεν υπάρχουν drops. Φτιάξε το πρώτο για να εμφανίζεται στην αρχική.
           </div>
         )}

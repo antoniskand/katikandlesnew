@@ -79,12 +79,12 @@ export function SimpleCrudList({ endpoint, rows, columns, newDefaults = {}, item
       </div>
 
       <div
-        className="bg-white border-2 border-[#1a1a1a] rounded-3xl overflow-hidden"
+        className="border-t border-[#1a1a1a]/12 overflow-hidden"
         style={{ boxShadow: "0 12px 28px -16px rgba(26, 18, 8, 0.25)" }}
       >
         <table className="w-full text-sm">
-          <thead className="bg-[#f7e7ce] border-b-2 border-[#1a1a1a]/10">
-            <tr className="text-left text-[#502e23]/70 uppercase text-[10px] tracking-wider">
+          <thead className="bg-[#f4eee2] border-b-2 border-[#1a1a1a]/10">
+            <tr className="text-left text-[#1a1a1a]/55 uppercase text-[10px] tracking-wider">
               {visibleCols.map((c) => (
                 <th key={c.key} className="px-4 py-3">{c.label}</th>
               ))}
@@ -93,7 +93,7 @@ export function SimpleCrudList({ endpoint, rows, columns, newDefaults = {}, item
           </thead>
           <tbody className="divide-y divide-ink/5">
             {rows.map((row) => (
-              <tr key={row.id} className="hover:bg-[#f7e7ce]/50">
+              <tr key={row.id} className="hover:bg-[#f4eee2]/50">
                 {visibleCols.map((c) => (
                   <td key={c.key} className="px-4 py-3">
                     {c.render
@@ -106,7 +106,7 @@ export function SimpleCrudList({ endpoint, rows, columns, newDefaults = {}, item
                 <td className="px-4 py-3 text-right">
                   <button
                     onClick={() => setEditing(row)}
-                    className="text-[#ff6b35] hover:underline text-sm font-medium mr-3"
+                    className="text-xs tracking-[0.12em] uppercase text-[#1a1a1a]/70 hover:text-[#1a1a1a] border-b border-[#1a1a1a]/20 hover:border-[#1a1a1a] pb-0.5 transition-colors mr-3"
                   >
                     <Edit3 className="inline h-3.5 w-3.5 mr-1" /> edit
                   </button>
@@ -121,7 +121,7 @@ export function SimpleCrudList({ endpoint, rows, columns, newDefaults = {}, item
             ))}
           </tbody>
         </table>
-        {rows.length === 0 && <p className="text-center text-[#502e23]/70 py-12">καμία εγγραφή</p>}
+        {rows.length === 0 && <p className="text-center text-[#1a1a1a]/55 py-12">καμία εγγραφή</p>}
       </div>
 
       {(editing || creating) && (
@@ -166,7 +166,7 @@ function CrudForm({
     <form onSubmit={handleSubmit} className="space-y-3">
       {columns.map((c) => (
         <label key={c.key} className="block">
-          <span className="caption text-[#502e23]/70 mb-1.5 block">
+          <span className="caption text-[#1a1a1a]/55 mb-1.5 block">
             {c.label} {c.required && "*"}
           </span>
           {c.type === "checkbox" ? (
@@ -174,7 +174,7 @@ function CrudForm({
               type="checkbox"
               checked={!!data[c.key]}
               onChange={(e) => setData({ ...data, [c.key]: e.target.checked })}
-              className="w-5 h-5 accent-[#ff6b35]"
+              className="w-5 h-5 accent-[#1a1a1a]"
             />
           ) : c.type === "select" ? (
             <select
@@ -225,14 +225,14 @@ function Modal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1a1a1a]/50 backdrop-blur-sm">
       <div
-        className="bg-white border-2 border-[#1a1a1a] rounded-3xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto"
+        className="bg-white border-2 border-[#1a1a1a]  p-6 max-w-md w-full max-h-[90vh] overflow-y-auto"
         style={{ boxShadow: "0 12px 28px -16px rgba(26, 18, 8, 0.25)" }}
       >
         <div className="flex items-center justify-between mb-5">
           <h2 className="font-heading font-bold text-xl">{title}</h2>
           <button
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-[#f7e7ce]"
+            className="p-2  hover:bg-[#f4eee2]"
             aria-label="Close"
           >
             <X className="h-5 w-5" />

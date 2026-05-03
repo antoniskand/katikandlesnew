@@ -115,7 +115,7 @@ export function DropForm({ initial, products }: DropFormProps) {
               <input type="datetime-local" className="kk-input" value={form.ends_at} onChange={(e) => update("ends_at", e.target.value)} />
             </Field>
           </div>
-          <p className="text-xs text-[#502e23]/70">Άδεια = πάντα ενεργό</p>
+          <p className="text-xs text-[#1a1a1a]/55">Άδεια = πάντα ενεργό</p>
         </Card>
 
         <Card title="Προϊόντα drop">
@@ -126,8 +126,8 @@ export function DropForm({ initial, products }: DropFormProps) {
               return (
                 <label
                   key={p.id}
-                  className={`flex flex-col gap-1 p-2 rounded-2xl border-2 cursor-pointer transition-colors ${
-                    checked ? "border-[#ff6b35] bg-[#ff6b35]/10" : "border-[#1a1a1a]/15 hover:border-[#1a1a1a]/40"
+                  className={`flex flex-col gap-1 p-2  border-2 cursor-pointer transition-colors ${
+                    checked ? "border-[#1a1a1a] bg-[#1a1a1a]/5" : "border-[#1a1a1a]/15 hover:border-[#1a1a1a]/40"
                   }`}
                 >
                   <input
@@ -143,7 +143,7 @@ export function DropForm({ initial, products }: DropFormProps) {
                       )
                     }
                   />
-                  <div className="relative aspect-square rounded-xl bg-[#f7e7ce] overflow-hidden">
+                  <div className="relative aspect-square  bg-[#f4eee2] overflow-hidden">
                     {img && <Image src={img} alt={p.name} fill sizes="100px" className="object-cover" />}
                   </div>
                   <span className="text-xs font-medium text-[#1a1a1a] line-clamp-2">{p.name}</span>
@@ -157,13 +157,13 @@ export function DropForm({ initial, products }: DropFormProps) {
       <div className="space-y-5">
         <Card title="Status">
           <label className="flex items-center gap-3 cursor-pointer">
-            <input type="checkbox" checked={form.active} onChange={(e) => update("active", e.target.checked)} className="w-5 h-5 accent-[#ff6b35]" />
+            <input type="checkbox" checked={form.active} onChange={(e) => update("active", e.target.checked)} className="w-5 h-5 accent-[#1a1a1a]" />
             <span className="font-medium">ενεργό</span>
           </label>
           <label className="flex items-center gap-3 cursor-pointer">
-            <input type="checkbox" checked={form.featured} onChange={(e) => update("featured", e.target.checked)} className="w-5 h-5 accent-[#ff6b35]" />
+            <input type="checkbox" checked={form.featured} onChange={(e) => update("featured", e.target.checked)} className="w-5 h-5 accent-[#1a1a1a]" />
             <span className="font-medium flex items-center gap-1">
-              <Star className="h-4 w-4 text-[#ffc107]" /> featured (αρχική)
+              <Star className="h-4 w-4 text-[#1a1a1a]" /> featured (αρχική)
             </span>
           </label>
           <Field label="Σειρά">
@@ -182,7 +182,7 @@ export function DropForm({ initial, products }: DropFormProps) {
                   key={c}
                   type="button"
                   onClick={() => update("background_color", c)}
-                  className={`w-9 h-9 rounded-xl border-2 ${
+                  className={`w-9 h-9  border-2 ${
                     form.background_color === c ? "border-[#1a1a1a] scale-110" : "border-[#1a1a1a]/20"
                   }`}
                   style={{ background: c }}
@@ -224,8 +224,8 @@ export function DropForm({ initial, products }: DropFormProps) {
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="bg-white border-2 border-[#1a1a1a] rounded-3xl p-5" style={{ boxShadow: "0 12px 28px -16px rgba(26, 18, 8, 0.25)" }}>
-      <h3 className="font-heading font-bold text-lg mb-4">{title}</h3>
+    <div className="bg-transparent">
+      <h3 className="text-[11px] tracking-[0.22em] uppercase text-[#1a1a1a]/50 mb-4">{title}</h3>
       <div className="space-y-3">{children}</div>
     </div>
   )
@@ -234,7 +234,7 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="caption text-[#502e23]/70 mb-1.5 block">{label}</span>
+      <span className="caption text-[#1a1a1a]/55 mb-1.5 block">{label}</span>
       {children}
     </label>
   )

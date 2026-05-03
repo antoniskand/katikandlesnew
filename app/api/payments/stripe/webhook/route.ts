@@ -3,7 +3,8 @@ import { eq } from "drizzle-orm"
 import { getStripeClient, STRIPE_WEBHOOK_SECRET } from "@/lib/stripe"
 import { db } from "@/lib/db"
 import { orderItems, orders } from "@/lib/db/schema"
-import { decrementStock, incrementCouponUsage } from "@/lib/db-queries"
+import { decrementStock, incrementCouponUsage, getOrder } from "@/lib/db-queries"
+import { sendOrderConfirmation } from "@/lib/order-emails"
 
 
 export const dynamic = "force-dynamic"
@@ -61,12 +62,22 @@ export async function POST(request: NextRequest) {
       }
 
       // Increment coupon usage if any
-      const order = await db.query.orders.findFirst({
+      const orderRow = await db.query.orders.findFirst({
         where: eq(orders.id, orderId),
         columns: { couponId: true },
       })
-      if (order?.couponId) {
-        await incrementCouponUsage(order.couponId)
+      if (orderRow?.couponId) {
+        await incrementCouponUsage(orderRow.couponId)
+      }
+
+      // Fire-and-forget the confirmation email (failures are logged inside).
+      try {
+        const fullOrder = await getOrder(orderId)
+        if (fullOrder) {
+          await sendOrderConfirmation(fullOrder, fullOrder.items || [])
+        }
+      } catch (e) {
+        console.error("[webhook] order email failed:", e)
       }
       break
     }

@@ -22,35 +22,31 @@ export default async function PagesAdmin() {
         }
       />
 
-      <div className="grid gap-3">
+      <div className="border-t border-[#1a1a1a]/12">
         {rows.map((p) => (
           <Link
             key={p.id}
             href={`/admin/pages/${p.id}`}
-            className="bg-white border-2 border-[#1a1a1a] rounded-3xl p-5 flex items-center gap-4 hover:translate-x-[-2px] hover:translate-y-[-2px] transition-transform"
-            style={{ boxShadow: "0 12px 28px -16px rgba(26, 18, 8, 0.25)" }}
+            className="grid grid-cols-[2.5rem_1fr_auto] gap-4 items-center py-5 border-b border-[#1a1a1a]/12 hover:bg-[#1a1a1a]/[0.02] px-2 -mx-2 transition-colors"
           >
-            <div className="p-3 rounded-2xl bg-[#ffc107] border-2 border-[#1a1a1a]">
-              <FileText className="h-5 w-5 text-[#1a1a1a]" />
+            <FileText className="h-4 w-4 text-[#1a1a1a]/40" />
+            <div className="min-w-0">
+              <h3 className="text-lg tracking-tight text-[#1a1a1a] truncate">{p.name}</h3>
+              <p className="text-xs text-[#1a1a1a]/50 mt-0.5">/{p.slug}</p>
             </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="font-heading font-bold text-lg truncate">{p.name}</h3>
-              <p className="text-sm text-[#502e23]/70">/{p.slug}</p>
-            </div>
-            <span
-              className={`text-xs font-medium px-2 py-1 rounded-full ${
-                p.active
-                  ? "bg-[#0f9b81]/15 text-[#0f9b81]"
-                  : "bg-[#1a1a1a]/10 text-[#502e23]/70"
-              }`}
-            >
+            <span className="inline-flex items-center gap-2 text-[10px] tracking-[0.14em] uppercase text-[#1a1a1a]/70">
+              <span
+                className={`h-1.5 w-1.5 rounded-full ${
+                  p.active ? "bg-[#0f9b81]" : "bg-[#1a1a1a]/30"
+                }`}
+              />
               {p.active ? "δημοσιευμένη" : "πρόχειρο"}
             </span>
           </Link>
         ))}
 
         {rows.length === 0 && (
-          <div className="text-center text-[#502e23]/70 py-16 bg-white rounded-3xl border-2 border-dashed border-[#1a1a1a]/20">
+          <div className="text-center text-[#1a1a1a]/55 py-16">
             Δεν υπάρχουν σελίδες ακόμη.
           </div>
         )}

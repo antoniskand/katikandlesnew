@@ -167,13 +167,13 @@ export function ProductForm({ initial, categories }: ProductFormProps) {
           {form.images.length > 0 && (
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 mb-3">
               {form.images.map((img: any, i: number) => (
-                <div key={i} className="relative group rounded-2xl border-2 border-[#1a1a1a]/10 overflow-hidden aspect-square bg-[#f7e7ce]">
+                <div key={i} className="relative group  border-2 border-[#1a1a1a]/10 overflow-hidden aspect-square bg-[#f4eee2]">
                   <Image src={img.url} alt={img.alt || ""} fill sizes="120px" className="object-cover" />
                   <div className="absolute inset-0 bg-[#1a1a1a]/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
                     <button
                       type="button"
                       onClick={() => moveImage(i, -1)}
-                      className="p-1.5 rounded-full bg-white/90 hover:bg-white"
+                      className="p-1.5  bg-white/90 hover:bg-white"
                       aria-label="Μετακίνηση πάνω"
                     >
                       <GripVertical className="h-3.5 w-3.5 text-[#1a1a1a]" />
@@ -181,7 +181,7 @@ export function ProductForm({ initial, categories }: ProductFormProps) {
                     <button
                       type="button"
                       onClick={() => removeImage(i)}
-                      className="p-1.5 rounded-full bg-destructive/90 hover:bg-destructive text-white"
+                      className="p-1.5  bg-destructive/90 hover:bg-destructive text-white"
                       aria-label="Διαγραφή"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
@@ -221,7 +221,7 @@ export function ProductForm({ initial, categories }: ProductFormProps) {
               type="checkbox"
               checked={form.active}
               onChange={(e) => update("active", e.target.checked)}
-              className="w-5 h-5 accent-[#ff6b35]"
+              className="w-5 h-5 accent-[#1a1a1a]"
             />
             <span className="font-medium">ενεργό</span>
           </label>
@@ -255,7 +255,7 @@ export function ProductForm({ initial, categories }: ProductFormProps) {
               type="checkbox"
               checked={form.stock_tracking}
               onChange={(e) => update("stock_tracking", e.target.checked)}
-              className="w-5 h-5 accent-[#ff6b35]"
+              className="w-5 h-5 accent-[#1a1a1a]"
             />
             <span className="font-medium">παρακολούθηση</span>
           </label>
@@ -287,7 +287,7 @@ export function ProductForm({ initial, categories }: ProductFormProps) {
               <label key={c.id} className="flex items-center gap-2 text-sm cursor-pointer">
                 <input
                   type="checkbox"
-                  className="w-4 h-4 accent-[#ff6b35]"
+                  className="w-4 h-4 accent-[#1a1a1a]"
                   checked={form.categoryIds.includes(c.id)}
                   onChange={(e) => {
                     update(
@@ -334,10 +334,9 @@ export function ProductForm({ initial, categories }: ProductFormProps) {
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div
-      className="bg-white border-2 border-[#1a1a1a] rounded-3xl p-5"
-      style={{ boxShadow: "0 12px 28px -16px rgba(26, 18, 8, 0.25)" }}
+      className="bg-transparent"
     >
-      <h3 className="font-heading font-bold text-lg mb-4">{title}</h3>
+      <h3 className="text-[11px] tracking-[0.22em] uppercase text-[#1a1a1a]/50 mb-4">{title}</h3>
       <div className="space-y-3">{children}</div>
     </div>
   )
@@ -346,7 +345,7 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="caption text-[#502e23]/70 mb-1.5 block">{label}</span>
+      <span className="caption text-[#1a1a1a]/55 mb-1.5 block">{label}</span>
       {children}
     </label>
   )

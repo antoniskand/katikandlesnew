@@ -82,7 +82,7 @@ export function PageForm({ initial }: PageFormProps) {
       <div className="space-y-5">
         <Card title="Status">
           <label className="flex items-center gap-3 cursor-pointer">
-            <input type="checkbox" checked={form.active} onChange={(e) => update("active", e.target.checked)} className="w-5 h-5 accent-[#ff6b35]" />
+            <input type="checkbox" checked={form.active} onChange={(e) => update("active", e.target.checked)} className="w-5 h-5 accent-[#1a1a1a]" />
             <span className="font-medium">δημοσιευμένη</span>
           </label>
         </Card>
@@ -97,7 +97,7 @@ export function PageForm({ initial }: PageFormProps) {
               onChange={(e) => update("meta_description", e.target.value)}
               placeholder="μέχρι 160 χαρακτήρες"
             />
-            <span className="text-xs text-[#502e23]/70 mt-1 block">
+            <span className="text-xs text-[#1a1a1a]/55 mt-1 block">
               {form.meta_description.length}/160
             </span>
           </Field>
@@ -128,8 +128,8 @@ export function PageForm({ initial }: PageFormProps) {
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="bg-white border-2 border-[#1a1a1a] rounded-3xl p-5" style={{ boxShadow: "0 12px 28px -16px rgba(26, 18, 8, 0.25)" }}>
-      <h3 className="font-heading font-bold text-lg mb-4">{title}</h3>
+    <div className="bg-transparent">
+      <h3 className="text-[11px] tracking-[0.22em] uppercase text-[#1a1a1a]/50 mb-4">{title}</h3>
       <div className="space-y-3">{children}</div>
     </div>
   )
@@ -138,7 +138,7 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="caption text-[#502e23]/70 mb-1.5 block">{label}</span>
+      <span className="caption text-[#1a1a1a]/55 mb-1.5 block">{label}</span>
       {children}
     </label>
   )

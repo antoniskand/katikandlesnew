@@ -65,49 +65,50 @@ export default async function OrdersAdmin({ searchParams }: Props) {
           <Link
             key={s.id || "all"}
             href={s.id ? `/admin/orders?status=${s.id}` : "/admin/orders"}
-            className={`kk-tag ${status === s.id ? "bg-[#1a1a1a] text-[#ffc107] border-[#1a1a1a]" : ""}`}
+            className={`kk-tag ${
+              status === s.id ? "bg-[#1a1a1a] text-white border-[#1a1a1a]" : ""
+            }`}
           >
             {s.label}
           </Link>
         ))}
       </div>
 
-      <div
-        className="bg-white border-2 border-[#1a1a1a] rounded-3xl overflow-hidden"
-        style={{ boxShadow: "0 12px 28px -16px rgba(26, 18, 8, 0.25)" }}
-      >
+      <div className="border-t border-[#1a1a1a]/12 overflow-x-auto">
         <table className="w-full text-sm">
-          <thead className="bg-[#f7e7ce] border-b-2 border-[#1a1a1a]/10">
-            <tr className="text-left text-[#502e23]/70 uppercase text-[10px] tracking-wider">
-              <th className="px-4 py-3">order</th>
-              <th className="px-4 py-3">πελάτης</th>
-              <th className="px-4 py-3">σύνολο</th>
-              <th className="px-4 py-3">status</th>
-              <th className="px-4 py-3">date</th>
+          <thead>
+            <tr className="text-left text-[10px] tracking-[0.18em] uppercase text-[#1a1a1a]/45 border-b border-[#1a1a1a]/12">
+              <th className="px-3 py-3 font-normal">order</th>
+              <th className="px-3 py-3 font-normal">πελάτης</th>
+              <th className="px-3 py-3 font-normal">σύνολο</th>
+              <th className="px-3 py-3 font-normal">status</th>
+              <th className="px-3 py-3 font-normal">date</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-[#1a1a1a]/5">
+          <tbody className="divide-y divide-[#1a1a1a]/8">
             {rows.map((o) => (
-              <tr key={o.id} className="hover:bg-[#f7e7ce]/50 cursor-pointer">
-                <td className="px-4 py-3">
+              <tr key={o.id} className="hover:bg-[#1a1a1a]/[0.02] cursor-pointer">
+                <td className="px-3 py-3">
                   <Link
                     href={`/admin/orders/${o.id}`}
-                    className="font-bold text-[#ff6b35] hover:underline"
+                    className="text-[#1a1a1a] tabular-nums border-b border-[#1a1a1a]/30 hover:border-[#1a1a1a] pb-0.5"
                   >
                     {o.orderNumber}
                   </Link>
                 </td>
-                <td className="px-4 py-3">
-                  <p className="font-medium">
+                <td className="px-3 py-3">
+                  <p className="text-[#1a1a1a]">
                     {o.customerFirstName} {o.customerLastName}
                   </p>
-                  <p className="text-xs text-[#502e23]/70">{o.customerEmail}</p>
+                  <p className="text-xs text-[#1a1a1a]/55 mt-0.5">{o.customerEmail}</p>
                 </td>
-                <td className="px-4 py-3 font-bold">{formatPrice(Number(o.grandTotal))}</td>
-                <td className="px-4 py-3">
+                <td className="px-3 py-3 tabular-nums text-[#1a1a1a]">
+                  {formatPrice(Number(o.grandTotal))}
+                </td>
+                <td className="px-3 py-3">
                   <StatusBadge status={o.status} />
                 </td>
-                <td className="px-4 py-3 text-[#502e23]/70 text-xs">
+                <td className="px-3 py-3 text-[#1a1a1a]/55 text-xs tabular-nums">
                   {o.createdAt instanceof Date
                     ? o.createdAt.toLocaleDateString("el-GR", {
                         day: "2-digit",
@@ -120,7 +121,7 @@ export default async function OrdersAdmin({ searchParams }: Props) {
           </tbody>
         </table>
         {rows.length === 0 && (
-          <p className="text-center text-[#502e23]/70 py-12">Καμία παραγγελία.</p>
+          <p className="text-center text-[#1a1a1a]/55 py-12">Καμία παραγγελία.</p>
         )}
       </div>
     </div>
