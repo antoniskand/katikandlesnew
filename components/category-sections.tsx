@@ -132,7 +132,7 @@ function CategorySection({
                 </Link>
 
                 <motion.div
-                  whileHover={{ scale: 1.06, rotate: -2 }}
+                  whileHover={{ scale: 1.05 }}
                   transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
                   className="w-40 h-40 md:w-48 md:h-48 relative flex-shrink-0"
                 >
