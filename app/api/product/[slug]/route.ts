@@ -2,16 +2,13 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getProduct } from "@/lib/supabase-api"
 
-interface Ctx { params: Promise<{ slug: string }> }
-
-export async function GET(_req: NextRequest, { params }: Ctx) {
+export async function GET(request: NextRequest, { params }: { params: { slug: string } }) {
   try {
-    const { slug } = await params
-    if (!slug) {
-      return NextResponse.json({ error: "Product slug required" }, { status: 400 })
+    if (!params.slug) {
+      return NextResponse.json({ error: "Product slug is required" }, { status: 400 })
     }
 
-    const product = await getProduct(slug)
+    const product = await getProduct(params.slug)
 
     if (!product) {
       return NextResponse.json({ error: "Product not found" }, { status: 404 })

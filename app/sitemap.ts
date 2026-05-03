@@ -3,7 +3,7 @@ import type { MetadataRoute } from "next"
 import { getProducts } from "@/lib/supabase-api"
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://katikandles.gr"
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://kati-kandles.com"
 
   const staticPages: MetadataRoute.Sitemap = [
     { url: baseUrl, lastModified: new Date(), changeFrequency: "daily", priority: 1 },
@@ -14,9 +14,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/fragrances`, lastModified: new Date(), changeFrequency: "daily", priority: 0.8 },
     { url: `${baseUrl}/car-fragrances`, lastModified: new Date(), changeFrequency: "daily", priority: 0.8 },
     { url: `${baseUrl}/wax-melts`, lastModified: new Date(), changeFrequency: "daily", priority: 0.8 },
+    { url: `${baseUrl}/cart`, lastModified: new Date(), changeFrequency: "daily", priority: 0.6 },
+    { url: `${baseUrl}/checkout`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
     { url: `${baseUrl}/privacy-policy`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
     { url: `${baseUrl}/shipping-returns`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.4 },
-    { url: `${baseUrl}/terms-privacy`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
   ]
 
   let productPages: MetadataRoute.Sitemap = []

@@ -49,6 +49,8 @@ export function AddToCartButton({
 
     try {
       let product = productData
+
+      // If no product data passed, fetch it by ID
       if (!product) {
         const res = await fetch(`/api/product-by-id/${productId}`)
         if (!res.ok) throw new Error("Failed to fetch product")
@@ -66,7 +68,13 @@ export function AddToCartButton({
         }
       }
 
-      addItem({ product_id: productId, variant_id: variantId, product, quantity })
+      addItem({
+        product_id: productId,
+        variant_id: variantId,
+        product,
+        quantity,
+      })
+
       setIsAdded(true)
 
       addToast({
@@ -84,9 +92,11 @@ export function AddToCartButton({
         ),
       })
 
-      onSuccess?.()
+      if (onSuccess) onSuccess()
+
       setTimeout(() => setIsAdded(false), 2000)
     } catch (error) {
+      console.error("Error adding to cart:", error)
       addToast({
         title: "Σφάλμα προσθήκης στο καλάθι",
         description: error instanceof Error ? error.message : "Παρακαλώ δοκιμάστε ξανά.",
@@ -100,27 +110,18 @@ export function AddToCartButton({
   return (
     <Button
       onClick={handleAddToCart}
-      className={`${className} ${variant === "default" ? "bg-[#1a1a1a] hover:bg-[#1a1a1a]/85 text-white border-[#1a1a1a]" : ""}`}
+      className={`${className} ${variant === "default" ? "bg-black hover:bg-gray-800 text-white border-black" : ""}`}
       variant={variant}
       size={size}
       disabled={disabled || isAdding}
       aria-label="Προσθήκη στο καλάθι"
     >
       {isAdding ? (
-        <>
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          Προσθήκη...
-        </>
+        <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Προσθήκη...</>
       ) : isAdded ? (
-        <>
-          <Check className="mr-2 h-4 w-4" />
-          Προστέθηκε
-        </>
+        <><Check className="mr-2 h-4 w-4" />Προστέθηκε</>
       ) : (
-        <>
-          {showIcon && <ShoppingCart className="mr-2 h-4 w-4" />}
-          Προσθήκη στο καλάθι
-        </>
+        <>{showIcon && <ShoppingCart className="mr-2 h-4 w-4" />}Προσθήκη στο καλάθι</>
       )}
     </Button>
   )

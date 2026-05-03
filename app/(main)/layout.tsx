@@ -8,7 +8,7 @@ import { CategoriesProvider } from "@/context/categories-context"
 function PageLoadingFallback() {
   return (
     <div className="flex-1 min-h-[80vh] flex items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
     </div>
   )
 }

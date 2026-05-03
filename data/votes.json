@@ -1,0 +1,32 @@
+{
+  "options": [
+    {
+      "id": "kalocherry",
+      "name": "Kalocherry Κερί και Μelts",
+      "description": "Cherry-scented candles and wax melts",
+      "votes": 5
+    },
+    {
+      "id": "clothes",
+      "name": "Ρούχα Kati Kandles",
+      "description": "Branded clothing and merchandise",
+      "votes": 3
+    },
+    {
+      "id": "watermelon",
+      "name": "Αρωματικά Καρπούζι",
+      "description": "Watermelon-scented products",
+      "votes": 7
+    }
+  ],
+  "customSuggestions": [
+    {
+      "suggestion": "Lavender and vanilla candles",
+      "votes": 2
+    },
+    {
+      "suggestion": "Coffee scented candles",
+      "votes": 4
+    }
+  ]
+}

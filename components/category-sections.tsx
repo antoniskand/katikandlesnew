@@ -5,17 +5,43 @@ import Image from "next/image"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { useCategories } from "@/context/categories-context"
-import { formatPrice } from "@/lib/utils"
+
+// Map product slugs to custom transparent background images
+const customProductImages: Record<string, string> = {
+  "cupca-krie-candle": "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/cupcakerieNB.PNG-NYoIRtxtUiF0fiykP61ZCAUR0u6k6v.png",
+  "just-vanilla-candle-150gr": "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/just_vanillaNB.PNG-mb1N9RpmDHLGfYOwRwYIk6EctuKDhL.png",
+  "apple-cinnamon-candle-150gr": "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/apple_cinnamonNB.PNG-C9yhIx96IVickJPHxExOJK60XKZe8q.png",
+  "pistachio-cream-candle-150gr": "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/pistachio_creamNB.PNG-D5qWqCnrE1D0biVhPolixzVRRtHlCq.png",
+  "be-my-brownie-valentines-day-candle-150g": "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/BeMyBrownieNB-RRXxGsUYWXx5Jp9COPpPDM7cXx3KFD.png",
+  "ena-loyloydi-gia-to-loyloydi-valentines-day-candle-150g": "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/EnaLoyloydiNB-X1ZPTr3sI8xLw9A6AIo0PqnB4NzllP.png",
+  "single-fudgy-valentines-day-candle-150g": "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/singlefudgyNB.PNG-Anqga2jRCRS2Qx5fAq3Y8LgmVQ1iRV.png",
+  "i-can-buy-myself-flowers-valentines-day-candle-150g": "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/ICanBuyNB-UH6IpJlG8UZHEbczDfR1IUx2f2q89E.png",
+  "gluhwein-candle-150gr": "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/IMG_5866.PNG-I2AcGiVBlbrPPc714Rrg4Lcub1LChL.png",
+}
+
+// Images that need scaling up to match others
+const smallerImages = new Set([
+  "cupca-krie-candle",
+  "just-vanilla-candle-150gr",
+  "apple-cinnamon-candle-150gr",
+  "pistachio-cream-candle-150gr",
+  "single-fudgy-valentines-day-candle-150g",
+])
+
+// Images that need extra scaling (wider/landscape format)
+const extraScaleImages = new Set([
+  "gluhwein-candle-150gr",
+])
 
 interface CategoryProduct {
   id: string
   name: string
   slug: string
   price: number
-  sale_price?: number | null
   images?: Array<{
-    url?: string
-    file?: { url?: string }
+    file?: {
+      url?: string
+    }
   }>
 }
 
@@ -42,25 +68,21 @@ function CategorySection({
   accentColor,
   reverse = false,
 }: CategorySectionProps) {
+  // Show all products in a grid
+  const displayProducts = products
+
+  // Helper function to get product image (custom or default)
   const getProductImage = (product: CategoryProduct) => {
-    return (
-      product.images?.[0]?.url ||
-      product.images?.[0]?.file?.url ||
-      "/placeholder.svg?height=400&width=400"
-    )
+    return customProductImages[product.slug] || product.images?.[0]?.url || "/placeholder.svg?height=400&width=400"
   }
 
-  const isLightBg = bgColor.includes("white") || bgColor.includes("[#fff")
-  const headingColor = isLightBg ? "#1a1a1a" : "#ffffff"
-  const bodyColor = isLightBg ? "#5a5a5a" : "rgba(255,255,255,0.85)"
-
   return (
-    <div
-      id={id}
-      className={`relative py-16 md:py-32 overflow-hidden ${bgColor} scroll-mt-24 z-10`}
-      style={{ position: "relative", zIndex: 10 }}
+    <div 
+      id={id} 
+      className={`relative py-12 md:py-32 overflow-hidden ${bgColor} scroll-mt-20 z-10`}
+      style={{ position: 'relative', zIndex: 10 }}
     >
-      {/* Massive background type */}
+      {/* MASSIVE Background Text - Larger on mobile */}
       <div className="absolute top-1/2 -translate-y-1/2 left-0 right-0 z-0 pointer-events-none overflow-hidden">
         <motion.div
           initial={{ opacity: 0, x: reverse ? 100 : -100 }}
@@ -70,7 +92,7 @@ function CategorySection({
           className={reverse ? "text-right -mr-4" : "-ml-4"}
         >
           <h2
-            className={`text-[28vw] md:text-[22vw] font-light tracking-tighter whitespace-nowrap leading-none opacity-15 ${textColor}`}
+            className={`text-[28vw] md:text-[22vw] font-light tracking-tighter whitespace-nowrap leading-none opacity-20 ${textColor}`}
           >
             {backgroundText}
           </h2>
@@ -78,62 +100,54 @@ function CategorySection({
       </div>
 
       <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
-          className="mb-14 text-center"
+          className="mb-12 text-center"
         >
-          <h3 className="headline-md mb-4" style={{ color: headingColor }}>
-            {title}
-          </h3>
-          <p className="body-md max-w-2xl mx-auto" style={{ color: bodyColor }}>
-            {description}
-          </p>
+          <h3 className="headline-md mb-4" style={{ color: bgColor.includes('white') ? '#1a1a1a' : '#ffffff' }}>{title}</h3>
+          <p className="body-md max-w-2xl mx-auto" style={{ color: bgColor.includes('white') ? '#5a5a5a' : 'rgba(255,255,255,0.8)' }}>{description}</p>
         </motion.div>
 
-        <div className="space-y-3 md:space-y-5">
+        {/* Product List with Alternating Images */}
+        <div className="space-y-2 md:space-y-4">
           {products.map((product, index) => {
             const isEven = index % 2 === 0
-            const isOnSale =
-              product.sale_price != null && product.sale_price < (product.price ?? 0)
             return (
               <motion.div
                 key={product.id}
                 initial={{ opacity: 0, x: isEven ? -30 : 30 }}
                 whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.7, delay: Math.min(index * 0.06, 0.4) }}
+                transition={{ duration: 0.8, delay: index * 0.1 }}
                 viewport={{ once: true }}
-                className={`flex flex-col md:flex-row items-center gap-4 md:gap-6 ${
+                className={`flex flex-col md:flex-row items-center gap-3 md:gap-4 ${
                   isEven ? "md:ml-0" : "md:ml-12"
                 }`}
               >
-                <Link href={`/products/${product.slug}`} className="flex-1 group w-full">
-                  <div
-                    className="border-l-4 pl-6 hover:bg-white/30 transition-colors py-4 rounded-r-lg"
+                {/* Product Info */}
+                <Link
+                  href={`/products/${product.slug}`}
+                  className="flex-1 group"
+                >
+                  <div className={`border-l-4 pl-6 hover:bg-white/30 transition-colors py-4 rounded-r-lg`}
                     style={{ borderColor: accentColor }}
                   >
-                    <h4
-                      className="headline-sm mb-2 group-hover:opacity-70 transition-opacity"
-                      style={{ color: headingColor }}
-                    >
+                    <h4 className="headline-sm mb-2 group-hover:opacity-70 transition-opacity" style={{ color: bgColor.includes('white') ? '#1a1a1a' : '#ffffff' }}>
                       {product.name}
                     </h4>
-                    <div className="caption flex items-center gap-2" style={{ color: accentColor }}>
-                      <span>{formatPrice(product.sale_price ?? product.price)}</span>
-                      {isOnSale && (
-                        <span className="line-through opacity-60 text-xs">
-                          {formatPrice(product.price)}
-                        </span>
-                      )}
+                    <div className="caption" style={{ color: accentColor }}>
+                      €{product.price?.toFixed(2)}
                     </div>
                   </div>
                 </Link>
 
+                {/* Product Image */}
                 <motion.div
-                  whileHover={{ scale: 1.06, rotate: -2 }}
-                  transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ duration: 0.3 }}
                   className="w-40 h-40 md:w-48 md:h-48 relative flex-shrink-0"
                 >
                   <Link href={`/products/${product.slug}`}>
@@ -144,6 +158,7 @@ function CategorySection({
                       loading="lazy"
                       className="object-contain drop-shadow-lg"
                       sizes="(max-width: 768px) 160px, 192px"
+                      style={extraScaleImages.has(product.slug) ? { transform: 'scale(2.5)' } : smallerImages.has(product.slug) ? { transform: 'scale(1.6)' } : undefined}
                     />
                   </Link>
                 </motion.div>
@@ -171,30 +186,27 @@ export function CategorySections({
 }: CategorySectionsProps) {
   const { setAvailableCategories } = useCategories()
 
+  // Update available categories based on which have products
   useEffect(() => {
     const categories = [
       { id: "candles", label: "Κεριά", hasProducts: candleProducts.length > 0 },
       { id: "fragrances", label: "Αρωματικά Ντουλάπας", hasProducts: fragranceProducts.length > 0 },
       { id: "car-fragrances", label: "Αρωματικα Αυτοκινητου", hasProducts: carFragranceProducts.length > 0 },
       { id: "wax-melts", label: "Wax Melts", hasProducts: waxMeltProducts.length > 0 },
-    ].filter((cat) => cat.hasProducts)
+    ].filter(cat => cat.hasProducts)
+
     setAvailableCategories(categories)
-  }, [
-    candleProducts.length,
-    fragranceProducts.length,
-    carFragranceProducts.length,
-    waxMeltProducts.length,
-    setAvailableCategories,
-  ])
+  }, [candleProducts.length, fragranceProducts.length, carFragranceProducts.length, waxMeltProducts.length, setAvailableCategories])
 
   return (
     <section className="relative z-10 bg-background">
+      {/* Candles Section */}
       {candleProducts.length > 0 && (
         <CategorySection
           id="candles"
           title="candles"
           backgroundText="candles"
-          description="Χειροποίητα κεριά σόγιας με μοναδικά αρώματα. Κάθε κερί φτιάχνεται με μεράκι και προσοχή στη λεπτομέρεια."
+          description="Χειροποίητα κεριά σόγιας με μοναδικά αρώματα. Κάθε κερί είναι φτιαγμένο με αγάπη και προσοχή στη λεπτομέρεια."
           products={candleProducts}
           bgColor="bg-[#ff6b35]"
           textColor="text-white"
@@ -203,12 +215,13 @@ export function CategorySections({
         />
       )}
 
+      {/* Fragrances Section */}
       {fragranceProducts.length > 0 && (
         <CategorySection
           id="fragrances"
           title="fragrances"
           backgroundText="αρωματικά"
-          description="Αρωματικά ντουλάπας για να γεμίσεις τους χώρους σου με υπέροχες ευωδιές που διαρκούν."
+          description="Αρωματικά ντουλάπας για να γεμίσετε τους χώρους σας με υπέροχες ευωδιές που διαρκούν."
           products={fragranceProducts}
           bgColor="bg-white"
           textColor="text-[#6a1b9a]"
@@ -217,12 +230,13 @@ export function CategorySections({
         />
       )}
 
+      {/* Car Fragrances Section */}
       {carFragranceProducts.length > 0 && (
         <CategorySection
           id="car-fragrances"
           title="car fragrances"
           backgroundText="αυτοκίνητο"
-          description="Αρωματικά αυτοκινήτου για απολαυστικές διαδρομές. Μετάτρεψε κάθε ταξίδι σε εμπειρία."
+          description="Αρωματικά αυτοκινήτου για απολαυστικές διαδρομές. Μετατρέψτε κάθε ταξίδι σε εμπειρία."
           products={carFragranceProducts}
           bgColor="bg-[#ffc107]"
           textColor="text-[#1a1a1a]"
@@ -231,12 +245,13 @@ export function CategorySections({
         />
       )}
 
+      {/* Wax Melts Section */}
       {waxMeltProducts.length > 0 && (
         <CategorySection
           id="wax-melts"
           title="wax melts"
           backgroundText="wax melts"
-          description="Wax melts για καυστήρες. Τοποθέτησε, άναψε και απόλαυσε το άρωμα να γεμίζει τον χώρο."
+          description="Wax melts για καυστήρες. Απλά τοποθετήστε, ανάψτε και απολαύστε το άρωμα να γεμίζει το χώρο."
           products={waxMeltProducts}
           bgColor="bg-[#6a1b9a]"
           textColor="text-white"

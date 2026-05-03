@@ -1,81 +1,34 @@
 import type React from "react"
-import type { Metadata, Viewport } from "next"
+import type { Metadata } from "next"
 import "../styles/globals.css"
 import { Toaster } from "@/components/ui/toaster"
 import { CartProvider } from "@/context/cart-context"
 import { ToastContextProvider } from "@/context/toast-context"
-import { inter } from "./fonts"
-import { OrganizationJsonLd } from "@/components/seo/json-ld"
-
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://katikandles.gr"
 
 export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
-  title: {
-    default: "Kati Kandles — Χειροποίητα κεριά σόγιας",
-    template: "%s · Kati Kandles",
-  },
+  title: "Kati Kandles - Handcrafted Candles & Fragrances",
   description:
-    "Χειροποίητα κεριά, αρωματικά χώρου, wax melts και αρωματικά αυτοκινήτου από φυσική σόγια. Φτιαγμένα με μεράκι στην Ελλάδα.",
-  applicationName: "Kati Kandles",
-  keywords: [
-    "κεριά σόγιας",
-    "χειροποίητα κεριά",
-    "αρωματικά χώρου",
-    "wax melts",
-    "αρωματικό αυτοκινήτου",
-    "kati kandles",
-  ],
-  authors: [{ name: "Kati Kandles" }],
-  creator: "Kati Kandles",
-  publisher: "Kati Kandles",
-  alternates: { canonical: "/" },
-  openGraph: {
-    type: "website",
-    locale: "el_GR",
-    url: SITE_URL,
-    siteName: "Kati Kandles",
-    title: "Kati Kandles — Χειροποίητα κεριά σόγιας",
-    description:
-      "Χειροποίητα κεριά, αρωματικά χώρου, wax melts και αρωματικά αυτοκινήτου από φυσική σόγια.",
-    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Kati Kandles" }],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "Kati Kandles",
-    description: "Χειροποίητα κεριά σόγιας.",
-    images: ["/opengraph-image"],
-  },
-  icons: { icon: "/icon.svg", apple: "/icon.svg" },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
-  },
-}
-
-export const viewport: Viewport = {
-  themeColor: "#f7e7ce",
-  width: "device-width",
-  initialScale: 1,
+    "Discover our collection of handcrafted candles, home fragrances, car air fresheners, and wax melts. Premium quality scents for every space.",
+  generator: "v0.dev",
 }
 
 export default function RootLayout({
   children,
-}: Readonly<{ children: React.ReactNode }>) {
+}: Readonly<{
+  children: React.ReactNode
+}>) {
   return (
-    <html lang="el" className={inter.variable}>
+    <html lang="en">
       <head>
         <meta name="color-scheme" content="light only" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;500;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;500&display=swap"
           rel="stylesheet"
         />
       </head>
-      <body className="font-sans antialiased">
-        <OrganizationJsonLd />
+      <body className="font-sans">
         <ToastContextProvider>
           <CartProvider>
             {children}

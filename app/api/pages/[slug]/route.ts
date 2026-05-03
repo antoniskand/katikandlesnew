@@ -4,11 +4,10 @@ import { getPage } from "@/lib/supabase-api"
 
 export const dynamic = "force-dynamic"
 
-interface Ctx { params: Promise<{ slug: string }> }
-
-export async function GET(_req: Request, { params }: Ctx) {
+export async function GET(request: Request, { params }: { params: { slug: string } }) {
   try {
-    const { slug } = await params
+    const { slug } = params
+
     const page = await getPage(slug)
 
     if (!page) {

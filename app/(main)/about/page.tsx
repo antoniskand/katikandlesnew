@@ -1,37 +1,29 @@
-import type { Metadata } from "next"
+// app/(main)/about/page.tsx
 import { notFound } from "next/navigation"
 import { getPage } from "@/lib/supabase-api"
-import { BreadcrumbJsonLd } from "@/components/seo/json-ld"
 
 export const revalidate = 3600
 
-export const metadata: Metadata = {
-  title: "Η ιστορία μας",
-  description:
-    "Η ιστορία πίσω από τα Kati Kandles — χειροποίητα κεριά σόγιας, φτιαγμένα με μεράκι στην Ελλάδα.",
-  alternates: { canonical: "/about" },
-}
-
 export default async function AboutPage() {
-  const pageContent = await getPage("about-us").catch(() => null)
+  let pageContent = null
 
-  if (!pageContent) notFound()
+  try {
+    pageContent = await getPage("about-us")
+  } catch {
+    // fall through
+  }
+
+  if (!pageContent) {
+    return notFound()
+  }
 
   return (
-    <section className="pt-28 md:pt-32 pb-16 bg-[#f7e7ce]">
-      <BreadcrumbJsonLd
-        items={[
-          { name: "Αρχική", url: "/" },
-          { name: "Η ιστορία μας", url: "/about" },
-        ]}
-      />
+    <section className="pt-24 pb-12 bg-white">
       <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-        <div className="caption text-[#502e23]/60 mb-3">our story</div>
-        <h1 className="headline-md text-[#1a1a1a] mb-8">{pageContent.name}</h1>
-        <div
-          className="prose prose-lg max-w-none text-[#502e23]/85 prose-headings:text-[#1a1a1a] prose-strong:text-[#1a1a1a] prose-a:text-[#ff6b35]"
-          dangerouslySetInnerHTML={{ __html: pageContent.content || "" }}
-        />
+        <div className="prose prose-lg max-w-none">
+          <h1 className="mt-8">{pageContent.name}</h1>
+          <div dangerouslySetInnerHTML={{ __html: pageContent.content || "" }} />
+        </div>
       </div>
     </section>
   )
